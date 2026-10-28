@@ -42,8 +42,8 @@ export const ANALYSIS_CONFIG: AnalysisConfig = {
   color: {
     // Chosen after inspecting the observed distribution (docs/METHODOLOGY.md,
     // "Scale bounds"): ±12 pp spans the 5th–95th percentile of non-gray
-    // localities (−1.4 to +10.7 pp), so the very large increases in many
-    // Arab-plurality localities (median +28 pp) are clipped — and flagged —
+    // localities (−2.0 to +12.2 pp), so the very large increases in many
+    // Arab-plurality localities (median +26.6 pp) are clipped — and flagged —
     // instead of flattening every other difference. Adjustable in the legend.
     maxAbsChangePp: 12,
     direction: "darker_means_increase",

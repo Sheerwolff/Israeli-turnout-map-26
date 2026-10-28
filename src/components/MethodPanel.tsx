@@ -19,7 +19,11 @@ export function MethodPanel({ dataset, cfg }: { dataset: Dataset; cfg: AnalysisC
 
       <h3>Turnout</h3>
       <p>{dataset.meta.turnoutDefinition}</p>
-      <p>2026 per ballot box: the counted figure where the box is in the CEC count; otherwise the 22:00 election-day turnout feed (preliminary, flagged; boxes last updated before 21:30 flagged as stale). Coverage is measured against the CEC roster of all boxes.</p>
+      {dataset.meta.primary2026 === "feed" ? (
+        <p>2026 per ballot box: the CEC 22:00 election-day turnout report (each box's last reported voters and eligible voters). Boxes missing from that report use the CEC vote count instead (flagged). Boxes last updated before 21:30 are flagged as stale: they under-state turnout, by about 3% for updates at 20:00–21:29 and by much more for earlier ones. Coverage is measured against the CEC roster of all boxes.</p>
+      ) : (
+        <p>2026 per ballot box: the counted figure where the box is in the CEC count; otherwise the 22:00 election-day turnout feed (preliminary, flagged; boxes last updated before 21:30 flagged as stale). Coverage is measured against the CEC roster of all boxes.</p>
+      )}
 
       <h3>Party groups</h3>
       {groups.map((g) => (

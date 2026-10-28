@@ -52,17 +52,28 @@ Party votes are never used as the numerator, and vote counts are never used in p
 
 **Change.** `turnout_change_pp = turnout_2026_pct − turnout_2022_pct`. This is a difference in percentage points, never a relative percentage change. 60% → 70% is +10 pp, and 80% → 75% and 40% → 35% are both −5 pp, with identical lightness.
 
-### 2026 while the count is not final
+### 2026 sources
 
-For each 2026 ballot box on the CEC roster:
+`primary2026` in `config/sources.json` decides which source wins for a ballot box present in both. It is currently **`"feed"`**, the project owner's choice. For each 2026 ballot box:
 
-1. If the box is in the **CEC count** (`expb.csv`), its counted *voters* and *eligible* are used.
-2. Otherwise, if it is in the **22:00 election-day turnout feed**, the feed's figures are used. The locality is flagged `uses_preliminary_feed`. A box whose last feed update was before 21:30 is also flagged `uses_stale_feed`: feed values are cumulative reports, so an early last update under-states turnout. Across boxes in both sources, stale feed boxes report about 4% fewer voters than the count.
-3. Otherwise the box is counted as missing.
+1. If the box is in the **CEC 22:00 election-day turnout report**, its reported *voters* and *eligible* are used (11,996 boxes).
+2. Otherwise, if it is in the **CEC vote count** (`expb.csv`, partial), the counted figures are used and the locality is flagged `uses_count_fallback` (20 boxes, 17 localities).
+3. Otherwise the box is counted as missing (2 boxes).
 
-`coverage = Σ eligible of boxes with data ÷ Σ eligible on the roster`. Localities below 98% are flagged `partial_2026_coverage` and drawn with a dashed outline. The Filters panel can drop localities that use feed figures, or that fall below a coverage threshold.
+**Stale feed boxes.** A feed figure is the box's *last report* of the day, so a box whose last update came before polls closed under-states its turnout. Boxes last updated before 21:30 (2,486 boxes, 21%) are flagged `uses_stale_feed`, and each locality carries `staleFeedShare`, the share of its electorate in such boxes. For boxes that are also in the count, feed voters ÷ counted voters is:
 
-When final results are published, replace `data/raw/2026/expb.csv`, or point `results2026` in `config/sources.json` at the final `expc.csv`. Then set `mode` to `official_final` and rebuild. Nothing else changes.
+| Last update | Boxes | Ratio |
+|---|---|---|
+| 21:30 or later | 8,856 | 1.00 |
+| 20:00–21:29 | ~1,980 | ~0.97 |
+| 18:00–19:59 | ~250 | ~0.97 |
+| before 18:00 | ~60 | 0.09–0.86 |
+
+The Filters panel can limit the stale share or exclude affected localities. With `primary2026: "count"`, the rule reverses: the count wins and the feed only fills uncounted boxes (flagged `uses_preliminary_feed`).
+
+`coverage = Σ eligible of boxes with data ÷ Σ eligible on the roster`. Localities below 98% are flagged `partial_2026_coverage` and drawn with a dashed outline.
+
+When final results are published, point `results2026` at the final file, set `primary2026` to `"count"` and `mode` to `"official_final"`, and rebuild. Nothing else changes.
 
 ## 3. Color
 
@@ -89,12 +100,12 @@ The colors are built in **OKLCH**, a perceptual color space, so equal lightness 
 
 ### Scale bounds
 
-Observed distribution of |Δ| (pp) with the 28 Oct 2026 data: median 5.1, 90th percentile 19.3, 95th percentile 29.6, maximum 55.3. The distribution is strongly bimodal:
+Observed distribution of |Δ| (pp) with the current data (22:00 feed as the 2026 source): median 5.1, 90th percentile 19.8, 95th percentile 28.9, maximum 55.3. The distribution is strongly bimodal:
 
 | Group | n | 5th pct | Median | 95th pct |
 |---|---|---|---|---|
-| Blue–red localities | 1,089 | −1.4 | +4.6 | +10.7 |
-| Gray localities | 126 | +14.4 | +27.9 | +40.4 |
+| Blue–red localities | 1,089 | −2.0 | +4.6 | +12.2 |
+| Gray localities | 126 | +13.1 | +26.6 | +39.2 |
 
 A shared scale has to choose between the two groups. The default bound of **±12 pp** covers the 5th–95th percentile range of the blue–red localities, so their differences stay visible. Most gray localities are then clipped, which the map flags rather than hides. The legend offers ±6, 8, 12, 20, 30 and 45 pp. Choosing ±45 pp shows every locality unclipped, but compresses the differences among non-gray localities.
 

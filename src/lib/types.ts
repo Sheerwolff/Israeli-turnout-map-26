@@ -79,6 +79,8 @@ export interface Year2026 {
   boxesMissing: number;
   /** Share of covered eligible voters whose figure comes from the 22:00 feed rather than the count. */
   feedShare: number;
+  /** Share of covered eligible voters in feed boxes last updated before the stale cutoff. */
+  staleFeedShare: number;
 }
 
 export type LocalityWarning =
@@ -89,6 +91,7 @@ export type LocalityWarning =
   | "invalid_turnout_2026"
   | "partial_2026_coverage"
   | "uses_preliminary_feed"
+  | "uses_count_fallback"
   | "uses_stale_feed"
   | "top_party_tie"
   | "no_bloc_votes"
@@ -133,6 +136,8 @@ export interface DatasetMeta {
   modeNote: string;
   sources: SourceInfo[];
   turnoutDefinition: string;
+  /** Which source wins for a 2026 box present in both. */
+  primary2026: "feed" | "count";
   national: {
     y2022: { eligible: number; voters: number; doubleEnvelopeVoters: number; officialTurnoutPct: number; localityTurnoutPct: number };
     y2026: {
@@ -142,7 +147,7 @@ export interface DatasetMeta {
       localityTurnoutPct: number;
       boxesRoster: number | null;
       boxesCount: number;
-      boxesFeedOnly: number;
+      boxesFeed: number;
       boxesMissing: number;
       feedNationalSample: { eligible: number; voters: number; pct: number } | null;
     };

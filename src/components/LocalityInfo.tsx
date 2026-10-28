@@ -182,8 +182,8 @@ export function DetailPanel({ r, color, parties, gradient, onClose }: { r: Local
         </table>
         {y26 && (
           <p className="small">
-            2026 sources: {y26.boxesCount} counted box{y26.boxesCount === 1 ? "" : "es"}
-            {y26.boxesFeed > 0 && <>, {y26.boxesFeed} from the preliminary 22:00 feed{y26.boxesFeedStale > 0 && <> ({y26.boxesFeedStale} last updated before 21:30)</>}</>}
+            2026 sources: {y26.boxesFeed} box{y26.boxesFeed === 1 ? "" : "es"} from the 22:00 turnout feed{y26.boxesFeedStale > 0 && <> ({y26.boxesFeedStale} last updated before 21:30)</>}
+            {y26.boxesCount > 0 && <>, {y26.boxesCount} from the vote count</>}
             {y26.boxesMissing > 0 && <>, {y26.boxesMissing} with no data yet</>}
             {y26.coverage !== null && <> · coverage {fmtShare(y26.coverage)} of {fmtInt(y26.rosterEligible)} registered</>}.
           </p>

@@ -123,7 +123,7 @@ export function App() {
           <p className="sub">Locality-level explorer. Hue = 2022 vote balance; lightness = change in turnout (percentage points).</p>
         </div>
         <div className={`mode mode-${meta.mode}`} role="status">
-          {meta.mode === "mock" ? "MOCK DATA — not real election results" : meta.mode === "official_partial" ? "2026: partial count (not final)" : "Official final results"}
+          {meta.mode === "mock" ? "MOCK DATA — not real election results" : meta.mode === "official_partial" ? (meta.primary2026 === "feed" ? "2026: election-day turnout report (not final)" : "2026: partial count (not final)") : "Official final results"}
         </div>
       </header>
 
@@ -137,7 +137,7 @@ export function App() {
           onHighlight={setLegendCell}
           countFor={countFor}
         />
-        <FiltersPanel filters={filters} onChange={setFilters} shown={shown.length} analysed={analysedCount} total={dataset.localities.length} populationGroups={popGroups} />
+        <FiltersPanel primary2026={meta.primary2026} filters={filters} onChange={setFilters} shown={shown.length} analysed={analysedCount} total={dataset.localities.length} populationGroups={popGroups} />
       </aside>
 
       <main className="map-wrap">

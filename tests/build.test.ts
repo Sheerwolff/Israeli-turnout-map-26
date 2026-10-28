@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildDataset, type GeometryInfo } from "../src/lib/build";
+import { buildDataset, DEFAULT_BUILD_OPTIONS, type GeometryInfo } from "../src/lib/build";
 import { parseCsv } from "../src/lib/csv";
 import { readResults, readTurnoutFeed } from "../src/lib/ingest";
 import { boxStats, groupSummaries, median, overallSummary } from "../src/lib/stats";
@@ -40,8 +40,9 @@ const feed = [
 
 const geometry: GeometryInfo[] = [10, 20, 30, 60].map((code) => ({ code, name_he: `g${code}`, name_en: null, population_group: null, population_2019: null, hasGeometry: true }));
 
-const build = () =>
+const build = (primary2026: "feed" | "count" = "count") =>
   buildDataset({
+    options: { ...DEFAULT_BUILD_OPTIONS, primary2026 },
     parties,
     results2022: readResults(expc22),
     results2026: readResults(expb26),
@@ -122,6 +123,46 @@ describe("dataset build", () => {
     expect(s.aggregateChangePp).not.toBeCloseTo(s.meanChangePp!);
     const groups = groupSummaries(out.localities, ANALYSIS_CONFIG);
     expect(groups.find((g) => g.group === "gray")!.n).toBe(1);
+  });
+});
+
+describe("dataset build with the turnout feed as primary 2026 source", () => {
+  const out = build("feed");
+  const byCode = new Map(out.localities.map((l) => [l.code, l]));
+
+  it("uses the feed for a box present in both sources", () => {
+    // Locality 20 box 2 is only in the feed; box 1 only in the count.
+    const b = byCode.get(20)!;
+    expect(b.y2026!.boxesFeed).toBe(1);
+    expect(b.y2026!.boxesCount).toBe(1);
+    expect(b.warnings).toContain("uses_count_fallback");
+    expect(b.warnings).not.toContain("uses_preliminary_feed");
+  });
+
+  it("falls back to the count for boxes missing from the feed", () => {
+    const a = byCode.get(10)!;
+    expect(a.y2026!.boxesCount).toBe(2);
+    expect(a.y2026!.turnoutPct).toBe(70);
+  });
+
+  it("reports the stale share of the electorate", () => {
+    expect(byCode.get(30)!.y2026!.staleFeedShare).toBe(1);
+    expect(byCode.get(10)!.y2026!.staleFeedShare).toBe(0);
+  });
+
+  it("prefers feed figures over count figures for the same box", () => {
+    const overlap = buildDataset({
+      parties,
+      options: { ...DEFAULT_BUILD_OPTIONS, primary2026: "feed" },
+      results2022: readResults(expc22),
+      results2026: readResults(expb26),
+      feed2026: readTurnoutFeed(['סמל יישוב,שם יישוב,מס.קלפי,ברזל,"בז""ב",מצביעים,אחוז הצבעה,שעת עידכון', "10,אלפא,1,1,500,300,60%,22:10"].join("\n")),
+      geometry,
+    });
+    const a = overlap.localities.find((l) => l.code === 10)!;
+    // Box 1 from the feed (300 voters), box 2 from the count (350): 650 / 1000.
+    expect(a.y2026!.voters).toBe(650);
+    expect(a.y2026!.boxesFeed).toBe(1);
   });
 });
 

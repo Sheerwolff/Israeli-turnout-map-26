@@ -16,9 +16,9 @@ const COUNT_LABEL: Record<string, string> = {
   top_party_ties: "Top-party ties",
   no_bloc_votes: "No votes for either bloc",
   partial_2026_coverage: "2026 coverage < 98%",
-  boxes_2026_count: "2026 boxes: counted",
-  boxes_2026_feed: "2026 boxes: from 22:00 feed (not yet counted)",
-  boxes_2026_feed_stale: "2026 boxes: from feed, last update < 21:30",
+  boxes_2026_count: "2026 boxes: from the vote count",
+  boxes_2026_feed: "2026 boxes: from the 22:00 feed",
+  boxes_2026_feed_stale: "2026 boxes: from the feed, last update < 21:30",
   boxes_2026_missing: "2026 boxes: no data",
 };
 

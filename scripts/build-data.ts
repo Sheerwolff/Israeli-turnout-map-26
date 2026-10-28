@@ -25,7 +25,8 @@ interface SourceEntry {
   notes: string;
   encoding?: string;
 }
-const sources = JSON.parse(readFileSync(join(ROOT, "config/sources.json"), "utf8")) as Record<string, SourceEntry> & { mode: DataMode; modeNote: string };
+const sources = JSON.parse(readFileSync(join(ROOT, "config/sources.json"), "utf8")) as Record<string, SourceEntry> & { mode: DataMode; modeNote: string; primary2026?: "feed" | "count" };
+const primary2026 = sources.primary2026 ?? "count";
 const partyConfig = JSON.parse(readFileSync(join(ROOT, "config/parties-2022.json"), "utf8")) as { parties: PartyDef[] };
 
 const used: SourceInfo[] = [];
@@ -74,7 +75,7 @@ if (MOCK) {
     feed2026: sources.feed2026 ? readTurnoutFeed(load("feed2026")) : undefined,
     roster2026: sources.roster2026 ? readRoster(load("roster2026")) : undefined,
     geometry,
-    options: DEFAULT_BUILD_OPTIONS,
+    options: { ...DEFAULT_BUILD_OPTIONS, primary2026 },
   };
 }
 
@@ -91,6 +92,7 @@ const dataset: Dataset = {
     mode,
     modeNote,
     sources: used,
+    primary2026: MOCK ? "count" : primary2026,
     turnoutDefinition:
       "Turnout = voters ÷ eligible voters × 100, per the CEC: 'voters' (מצביעים) are envelopes cast at the locality's ballot boxes (valid + invalid); 'eligible' (בזב) are registered voters assigned to those boxes. Double-envelope votes (soldiers, diplomats, prisoners, hospital patients, etc.; CEC code 9999) are counted centrally and not attributed to any locality, so locality turnout is lower than the national turnout. The same definition is used for both elections. turnout_change_pp = turnout_2026_pct − turnout_2022_pct.",
     national: {
@@ -102,7 +104,7 @@ const dataset: Dataset = {
         localityTurnoutPct: n26.eligibleCovered > 0 ? (n26.voters / n26.eligibleCovered) * 100 : NaN,
         boxesRoster: n26.boxesRoster,
         boxesCount: n26.boxesCount,
-        boxesFeedOnly: n26.boxesFeedOnly,
+        boxesFeed: n26.boxesFeed,
         boxesMissing: n26.boxesMissing,
         feedNationalSample: inputs.feed2026?.nationalSample ?? null,
       },

@@ -17,6 +17,8 @@ export interface GeometryInfo {
 }
 
 export interface BuildOptions {
+  /** Which 2026 source wins for a box present in both: the election-day turnout feed or the vote count. */
+  primary2026: "feed" | "count";
   /** Feed boxes whose last report is earlier than this "HH:MM" are marked stale. */
   staleFeedBefore: string;
   /** Coverage of the 2026 roster electorate below this share raises a partial-count warning. */
@@ -24,7 +26,7 @@ export interface BuildOptions {
   maxUnknownShare: number;
 }
 
-export const DEFAULT_BUILD_OPTIONS: BuildOptions = { staleFeedBefore: "21:30", partialCoverageBelow: 0.98, maxUnknownShare: 0.05 };
+export const DEFAULT_BUILD_OPTIONS: BuildOptions = { primary2026: "count", staleFeedBefore: "21:30", partialCoverageBelow: 0.98, maxUnknownShare: 0.05 };
 
 export interface BuildInputs {
   parties: PartyDef[];
@@ -34,7 +36,7 @@ export interface BuildInputs {
   results2022Boxes?: ResultsFile;
   /** 2026 counted results (box-level partial count, or a final file of either level). */
   results2026: ResultsFile;
-  /** Optional 2026 election-day turnout feed, used for boxes not yet in the count. */
+  /** Optional 2026 election-day turnout feed (primary or fallback, per options.primary2026). */
   feed2026?: TurnoutFeed;
   /** Optional 2026 roster of all ballot boxes, used to measure coverage. */
   roster2026?: RosterRow[];
@@ -54,7 +56,7 @@ export interface BuildOutput {
       voters: number;
       boxesRoster: number | null;
       boxesCount: number;
-      boxesFeedOnly: number;
+      boxesFeed: number;
       boxesMissing: number;
       doubleEnvelopeVoters: number;
     };
@@ -169,35 +171,14 @@ export function buildDataset(input: BuildInputs): BuildOutput {
   }
   const rosterByKey = new Map((roster ?? []).map((r) => [boxKey(r.code, r.box), r]));
 
+  const primary = opt.primary2026;
+  const countBoxes = new Map<string, Box26>();
+  const feedBoxes = new Map<string, Box26>();
   if (res26.level === "box") {
     const d = duplicates(rows26, (r) => boxKey(r.code, r.box ?? ""));
     if (d.length) issue("duplicate_boxes_2026", "error", `Duplicate ballot boxes in the 2026 count: ${d.slice(0, 20).join(", ")}`);
     for (const r of rows26) {
-      const k = boxKey(r.code, r.box ?? "");
-      boxes26.set(k, { code: r.code, name: r.name, eligible: r.eligible, voters: r.voters, source: "count", rosterEligible: rosterByKey.get(k)?.eligible ?? null });
-    }
-    if (input.feed2026) {
-      const d2 = duplicates(input.feed2026.rows, (r) => boxKey(r.code, r.box));
-      if (d2.length) issue("duplicate_boxes_feed_2026", "error", `Duplicate boxes in the 2026 turnout feed: ${d2.slice(0, 20).join(", ")}`);
-      const eligMismatch: number[] = [];
-      for (const f of input.feed2026.rows) {
-        const k = boxKey(f.code, f.box);
-        const existing = boxes26.get(k);
-        if (existing) {
-          if (existing.eligible !== f.eligible) eligMismatch.push(f.code);
-          continue;
-        }
-        const stale = !isAtOrAfter(f.updated, opt.staleFeedBefore);
-        boxes26.set(k, { code: f.code, name: f.name, eligible: f.eligible, voters: f.voters, source: stale ? "feed_stale" : "feed", rosterEligible: rosterByKey.get(k)?.eligible ?? null });
-      }
-      if (eligMismatch.length) issue("feed_vs_count_eligible_2026", "warning", "Boxes whose eligible-voter count differs between the 2026 turnout feed and the count.", eligMismatch);
-    }
-    for (const [k, r] of rosterByKey) {
-      if (!boxes26.has(k)) boxes26.set(k, { code: r.code, name: r.name, eligible: 0, voters: 0, source: "missing", rosterEligible: r.eligible });
-    }
-    if (roster) {
-      const notInRoster = [...boxes26.entries()].filter(([k, b]) => b.source !== "missing" && !rosterByKey.has(k)).map(([, b]) => b.code);
-      if (notInRoster.length) issue("boxes_not_in_roster_2026", "warning", `${notInRoster.length} ballot boxes with 2026 data are not on the 2026 roster.`, notInRoster);
+      countBoxes.set(boxKey(r.code, r.box ?? ""), { code: r.code, name: r.name, eligible: r.eligible, voters: r.voters, source: "count", rosterEligible: null });
     }
   } else {
     const d = duplicates(rows26, (r) => r.code) as number[];
@@ -209,9 +190,36 @@ export function buildDataset(input: BuildInputs): BuildOutput {
       loc26Totals.set(r.code, t);
     }
   }
+  if (input.feed2026) {
+    const d2 = duplicates(input.feed2026.rows, (r) => boxKey(r.code, r.box));
+    if (d2.length) issue("duplicate_boxes_feed_2026", "error", `Duplicate boxes in the 2026 turnout feed: ${d2.slice(0, 20).join(", ")}`);
+    for (const f of input.feed2026.rows) {
+      const stale = !isAtOrAfter(f.updated, opt.staleFeedBefore);
+      feedBoxes.set(boxKey(f.code, f.box), { code: f.code, name: f.name, eligible: f.eligible, voters: f.voters, source: stale ? "feed_stale" : "feed", rosterEligible: null });
+    }
+    const eligMismatch = [...feedBoxes].filter(([k, f]) => countBoxes.has(k) && countBoxes.get(k)!.eligible !== f.eligible).map(([, f]) => f.code);
+    if (eligMismatch.length) issue("feed_vs_count_eligible_2026", "warning", "Boxes whose eligible-voter count differs between the 2026 turnout feed and the count.", eligMismatch);
+  }
+  if (primary === "feed" && !feedBoxes.size) throw new Error("primary2026 is 'feed' but no turnout feed was provided");
+
+  // Per box: the primary source if it has the box, else the other source, else "missing" (roster only).
+  const useBoxes = res26.level === "box" || primary === "feed";
+  if (useBoxes) {
+    const [first, second] = primary === "feed" ? [feedBoxes, countBoxes] : [countBoxes, feedBoxes];
+    for (const k of new Set([...first.keys(), ...second.keys(), ...rosterByKey.keys()])) {
+      const b = first.get(k) ?? second.get(k);
+      const r = rosterByKey.get(k);
+      boxes26.set(k, b ? { ...b, rosterEligible: r?.eligible ?? null } : { code: r!.code, name: r!.name, eligible: 0, voters: 0, source: "missing", rosterEligible: r!.eligible });
+    }
+    if (roster) {
+      const notInRoster = [...boxes26.entries()].filter(([k, b]) => b.source !== "missing" && !rosterByKey.has(k)).map(([, b]) => b.code);
+      if (notInRoster.length) issue("boxes_not_in_roster_2026", "warning", `${notInRoster.length} ballot boxes with 2026 data are not on the 2026 roster.`, notInRoster);
+    }
+    if (res26.level === "locality") issue("count_not_merged_2026", "info", "The 2026 count is a locality-level file, so it cannot fill individual boxes missing from the turnout feed.");
+  }
 
   const y2026 = new Map<number, Year2026>();
-  if (res26.level === "box") {
+  if (useBoxes) {
     const byLoc = new Map<number, Box26[]>();
     for (const b of boxes26.values()) {
       const arr = byLoc.get(b.code) ?? [];
@@ -223,6 +231,7 @@ export function buildDataset(input: BuildInputs): BuildOutput {
       const eligible = withData.reduce((s, b) => s + b.eligible, 0);
       const voters = withData.reduce((s, b) => s + b.voters, 0);
       const feedElig = withData.filter((b) => b.source !== "count").reduce((s, b) => s + b.eligible, 0);
+      const staleElig = withData.filter((b) => b.source === "feed_stale").reduce((s, b) => s + b.eligible, 0);
       const rosterEligible = roster ? bs.reduce((s, b) => s + (b.rosterEligible ?? 0), 0) : null;
       const inRoster = bs.filter((b) => b.rosterEligible !== null).length;
       y2026.set(code, {
@@ -238,6 +247,7 @@ export function buildDataset(input: BuildInputs): BuildOutput {
         boxesFeedStale: bs.filter((b) => b.source === "feed_stale").length,
         boxesMissing: bs.filter((b) => b.source === "missing").length,
         feedShare: eligible > 0 ? feedElig / eligible : 0,
+        staleFeedShare: eligible > 0 ? staleElig / eligible : 0,
       });
     }
   } else {
@@ -263,6 +273,7 @@ export function buildDataset(input: BuildInputs): BuildOutput {
         boxesFeedStale: 0,
         boxesMissing: 0,
         feedShare: 0,
+        staleFeedShare: 0,
       });
     }
   }
@@ -302,7 +313,8 @@ export function buildDataset(input: BuildInputs): BuildOutput {
         exclusionReasons.push(b.eligible === 0 ? "no 2026 ballot boxes reported yet" : "2026 turnout unusable");
       }
       if (b.coverage !== null && b.coverage < opt.partialCoverageBelow) warnings.push("partial_2026_coverage");
-      if (b.boxesFeed > 0) warnings.push("uses_preliminary_feed");
+      if (primary === "count" && b.boxesFeed > 0) warnings.push("uses_preliminary_feed");
+      if (primary === "feed" && b.boxesCount > 0) warnings.push("uses_count_fallback");
       if (b.boxesFeedStale > 0) warnings.push("uses_stale_feed");
     } else {
       warnings.push("missing_2026");
@@ -362,8 +374,10 @@ export function buildDataset(input: BuildInputs): BuildOutput {
   if (partial.length) issue("partial_2026_coverage", "warning", `Localities where the 2026 data cover less than ${Math.round(opt.partialCoverageBelow * 100)}% of the roster electorate.`, partial);
   const feed = byWarn("uses_preliminary_feed");
   if (feed.length) issue("uses_preliminary_feed", "warning", "Localities where some 2026 boxes are not yet in the count and use the preliminary 22:00 turnout feed instead.", feed);
+  const fallback = byWarn("uses_count_fallback");
+  if (fallback.length) issue("uses_count_fallback", "warning", "Localities where some 2026 boxes are missing from the turnout feed and use the counted figure instead.", fallback);
   const stale = byWarn("uses_stale_feed");
-  if (stale.length) issue("uses_stale_feed", "warning", `Localities using feed boxes last updated before ${opt.staleFeedBefore} (likely to under-state turnout).`, stale);
+  if (stale.length) issue("uses_stale_feed", "warning", `Localities using feed boxes last updated before ${opt.staleFeedBefore}. A feed figure is the box's last report, so an early last update under-states turnout (by about 3% for boxes last updated 20:00–21:29, by much more for earlier ones).`, stale);
   const renamed = byWarn("name_differs_between_sources");
   if (renamed.length) issue("name_differs", "info", "Localities whose 2022 and 2026 CEC names differ (joined by code, not by name).", renamed);
 
@@ -405,7 +419,7 @@ export function buildDataset(input: BuildInputs): BuildOutput {
         voters: sum([...y2026.values()].map((y) => y.voters)),
         boxesRoster: roster ? roster.length : null,
         boxesCount: counts.boxes_2026_count,
-        boxesFeedOnly: counts.boxes_2026_feed + counts.boxes_2026_feed_stale,
+        boxesFeed: counts.boxes_2026_feed + counts.boxes_2026_feed_stale,
         boxesMissing: counts.boxes_2026_missing,
         doubleEnvelopeVoters: env26,
       },

@@ -16,8 +16,10 @@ export interface Filters {
   minCoverage2026: number;
   /** CBS population-group values to keep; empty = all. */
   populationGroups: string[];
-  /** Keep localities that use preliminary 22:00 feed figures for some boxes. */
-  includePreliminaryFeed: boolean;
+  /** Keep localities whose 2026 figure mixes the primary source with the fallback source for some boxes. */
+  includeMixedSources: boolean;
+  /** Maximum share of a locality's covered electorate in stale feed boxes (0–1). */
+  maxStaleFeedShare: number;
 }
 
 export const DEFAULT_FILTERS: Filters = {
@@ -28,7 +30,8 @@ export const DEFAULT_FILTERS: Filters = {
   minEligible: 0,
   minCoverage2026: 0,
   populationGroups: [],
-  includePreliminaryFeed: true,
+  includeMixedSources: true,
+  maxStaleFeedShare: 1,
 };
 
 export function isDefaultFilters(f: Filters): boolean {
@@ -53,6 +56,7 @@ export function passesFilters(r: LocalityRecord, f: Filters): boolean {
   if ((r.y2022?.eligible ?? 0) < f.minEligible) return false;
   if (f.minCoverage2026 > 0 && (r.y2026?.coverage ?? 1) < f.minCoverage2026) return false;
   if (f.populationGroups.length && !f.populationGroups.includes(r.populationGroup ?? "")) return false;
-  if (!f.includePreliminaryFeed && r.warnings.includes("uses_preliminary_feed")) return false;
+  if (!f.includeMixedSources && (r.warnings.includes("uses_preliminary_feed") || r.warnings.includes("uses_count_fallback"))) return false;
+  if (f.maxStaleFeedShare < 1 && (r.y2026?.staleFeedShare ?? 0) > f.maxStaleFeedShare) return false;
   return true;
 }

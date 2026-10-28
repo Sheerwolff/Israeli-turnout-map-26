@@ -2,6 +2,7 @@ import { DEFAULT_FILTERS, isDefaultFilters, type Filters } from "../lib/filters"
 import { POPULATION_GROUP_EN } from "../lib/format";
 
 interface Props {
+  primary2026: "feed" | "count";
   filters: Filters;
   onChange: (f: Filters) => void;
   shown: number;
@@ -12,7 +13,7 @@ interface Props {
 
 const num = (s: string): number | null => (s.trim() === "" || !Number.isFinite(Number(s)) ? null : Number(s));
 
-export function FiltersPanel({ filters: f, onChange, shown, analysed, total, populationGroups }: Props) {
+export function FiltersPanel({ primary2026, filters: f, onChange, shown, analysed, total, populationGroups }: Props) {
   const set = (patch: Partial<Filters>) => onChange({ ...f, ...patch });
   return (
     <section className="filters" aria-label="Filters">
@@ -55,8 +56,18 @@ export function FiltersPanel({ filters: f, onChange, shown, analysed, total, pop
           <input type="checkbox" checked={f.includeGray} onChange={(e) => set({ includeGray: e.target.checked })} /> Arab-party plurality (gray) localities
         </label>
         <label className="check">
-          <input type="checkbox" checked={f.includePreliminaryFeed} onChange={(e) => set({ includePreliminaryFeed: e.target.checked })} /> Localities using preliminary 22:00 feed figures for uncounted 2026 boxes
+          <input type="checkbox" checked={f.includeMixedSources} onChange={(e) => set({ includeMixedSources: e.target.checked })} />{" "}
+          {primary2026 === "feed" ? "Localities where some 2026 boxes are missing from the turnout feed and use the count" : "Localities using preliminary 22:00 feed figures for uncounted 2026 boxes"}
         </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Stale 2026 feed boxes (last update before 21:30)</legend>
+        <select value={f.maxStaleFeedShare} onChange={(e) => set({ maxStaleFeedShare: Number(e.target.value) })}>
+          {[1, 0.5, 0.25, 0.1, 0].map((v) => (
+            <option key={v} value={v}>{v === 1 ? "Allow any share" : v === 0 ? "Exclude localities with any" : `At most ${Math.round(v * 100)}% of the electorate`}</option>
+          ))}
+        </select>
       </fieldset>
 
       <fieldset>
