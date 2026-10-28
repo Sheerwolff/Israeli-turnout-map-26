@@ -44,9 +44,9 @@ export function Legend({ cfg, boundChoices, onBoundChange, onDirectionToggle, on
   });
   const cols: { lo: number; hi: number; mid: number; group?: TendencyGroup; label: string }[] = categorical
     ? [
-        { lo: -1, hi: cut.antiMax, mid: -1, group: "anti", label: `Anti-leaning (balance ≤ ${cut.antiMax})` },
+        { lo: -1, hi: cut.antiMax, mid: -1, group: "anti", label: `Opposition-leaning (balance ≤ ${cut.antiMax})` },
         { lo: cut.antiMax, hi: cut.proMin, mid: (cut.antiMax + cut.proMin) / 2, group: "balanced", label: `Balanced (${cut.antiMax} to +${cut.proMin})` },
-        { lo: cut.proMin, hi: 1, mid: 1, group: "pro", label: `Pro-leaning (balance ≥ +${cut.proMin})` },
+        { lo: cut.proMin, hi: 1, mid: 1, group: "pro", label: `Coalition-leaning (balance ≥ +${cut.proMin})` },
       ]
     : Array.from({ length: CONTINUOUS_COLS }, (_, j) => {
         const step = 2 / CONTINUOUS_COLS;
@@ -54,7 +54,7 @@ export function Legend({ cfg, boundChoices, onBoundChange, onDirectionToggle, on
         return { lo, hi: lo + step, mid: lo + step / 2, label: `Balance ${lo.toFixed(2)}…${(lo + step).toFixed(2)}` };
       });
   const COLS = cols.length;
-  const CELL_W = categorical ? 44 : CELL;
+  const CELL_W = categorical ? 54 : CELL;
   const darkerUp = cfg.direction === "darker_means_increase";
 
   const cellEvents = (cell: LegendCell, key: string, label: string) => ({
@@ -128,7 +128,7 @@ export function Legend({ cfg, boundChoices, onBoundChange, onDirectionToggle, on
         <text x={X0 - 4} y={ROWS * CELL - 4} className="tick" textAnchor="end">−{max}</text>
         {categorical ? (
           <>
-            {["Anti", "Balanced", "Pro"].map((t, j) => (
+            {["Opposition", "Balanced", "Coalition"].map((t, j) => (
               <text key={t} x={X0 + j * CELL_W + (CELL_W - 2) / 2} y={ROWS * CELL + 12} className="tick" textAnchor="middle">{t}</text>
             ))}
             <text x={X0 + CELL_W - 1} y={ROWS * CELL + 25} className="tick" textAnchor="middle">{cut.antiMax}</text>
@@ -143,8 +143,8 @@ export function Legend({ cfg, boundChoices, onBoundChange, onDirectionToggle, on
         )}
         {!categorical && (
           <>
-            <text x={X0} y={ROWS * CELL + 27} className="axis-label">← anti-Netanyahu</text>
-            <text x={X0 + COLS * CELL_W - 2} y={ROWS * CELL + 27} className="axis-label" textAnchor="end">pro-Netanyahu →</text>
+            <text x={X0} y={ROWS * CELL + 27} className="axis-label">← opposition</text>
+            <text x={X0 + COLS * CELL_W - 2} y={ROWS * CELL + 27} className="axis-label" textAnchor="end">Netanyahu coalition →</text>
           </>
         )}
         <text x={GRAY_X + (CELL_W - 2) / 2} y={ROWS * CELL + 12} className="tick" textAnchor="middle">Arab</text>
@@ -155,8 +155,8 @@ export function Legend({ cfg, boundChoices, onBoundChange, onDirectionToggle, on
         <li>
           <span className="axis-chip">columns</span>
           {categorical
-            ? `2022 political balance = (pro − anti) ÷ (pro + anti): blue ≤ ${cut.antiMax}, purple between, red ≥ +${cut.proMin}.`
-            : "2022 political balance = (pro − anti) ÷ (pro + anti), continuous."}
+            ? `2022 political balance = (coalition − opposition) ÷ (coalition + opposition): blue ≤ ${cut.antiMax}, purple between, red ≥ +${cut.proMin}.`
+            : "2022 political balance = (coalition − opposition) ÷ (coalition + opposition), continuous."}
         </li>
         <li><span className="swatch gray" /> Gray column: an Arab party was the single most-voted-for party in 2022. Same turnout lightness scale.</li>
         <li><span className="swatch dotted" /> Dotted outline: change beyond ±{max} pp (color clipped, true value in tooltip).</li>

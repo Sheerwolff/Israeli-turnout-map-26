@@ -5,8 +5,8 @@ import { fmtBalance, fmtInt, fmtPct, fmtPp, fmtShare, POPULATION_GROUP_EN, WARNI
 import type { LocalityRecord, PartyDef, PartyGroup } from "../lib/types";
 
 export const GROUP_LABEL: Record<PartyGroup, string> = {
-  pro_netanyahu: "Pro-Netanyahu bloc",
-  anti_netanyahu: "Anti-Netanyahu bloc",
+  pro_netanyahu: "Netanyahu coalition bloc",
+  anti_netanyahu: "Opposition bloc",
   arab_parties: "Arab parties",
   other_or_unclassified: "Other / unclassified",
 };
@@ -22,7 +22,7 @@ export function classificationText(r: LocalityRecord): string {
   if (c.category === "arab_plurality") return "Gray — Arab-party plurality in 2022";
   if (c.category === "bloc_balance") {
     const g = tendencyGroup(r, ANALYSIS_CONFIG.tendency);
-    return g === "anti" ? "Blue — anti-Netanyahu-leaning (2022)" : g === "pro" ? "Red — pro-Netanyahu-leaning (2022)" : "Purple — relatively balanced (2022)";
+    return g === "anti" ? "Blue — opposition-leaning (2022)" : g === "pro" ? "Red — Netanyahu-coalition-leaning (2022)" : "Purple — relatively balanced (2022)";
   }
   return "Political balance unavailable";
 }
@@ -105,9 +105,9 @@ function BalanceGauge({ balance, gradient }: { balance: number | null; gradient:
       <div className="gauge-bar" style={{ background: gradient }} />
       {balance !== null && <div className="gauge-mark" style={{ left: `${((balance + 1) / 2) * 100}%` }} />}
       <div className="gauge-labels">
-        <span>−1 anti</span>
+        <span>−1 opposition</span>
         <span>0</span>
-        <span>pro +1</span>
+        <span>coalition +1</span>
       </div>
     </div>
   );
@@ -166,7 +166,7 @@ export function DetailPanel({ r, color, parties, gradient, onClose }: { r: Local
           <dt>Political balance</dt><dd>{fmtBalance(c?.balance)}</dd>
         </dl>
         <BalanceGauge balance={c?.balance ?? null} gradient={gradient} />
-        <p className="muted small">Balance = (pro − anti) ÷ (pro + anti) among votes for those two blocs only; Arab-party and other votes are excluded from it. It is not a description of the whole electorate.</p>
+        <p className="muted small">Balance = (coalition − opposition) ÷ (coalition + opposition) among votes for those two blocs only; Arab-party and other votes are excluded from it. It is not a description of the whole electorate.</p>
         {c && <BlocBar r={r} />}
       </section>
 

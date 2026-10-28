@@ -60,7 +60,7 @@ export function Dashboard({ shown, excludedCount, filteredOut, meta, cfg, colors
         <GroupTable groups={groups} />
         <BoxPlots groups={groups} />
         <p className="small muted">
-          Groups match the map's hues: blue = anti-leaning (balance ≤ {cfg.tendency.antiMax}), purple = balanced, red = pro-leaning (≥ +{cfg.tendency.proMin}), gray = Arab-party plurality. Cut-offs are configurable in src/config/analysis.ts. Unweighted locality statistics. Differences between group averages do not show that political tendency caused the change in turnout — the groups also differ in size, demography, geography and in how complete their 2026 count is.
+          Groups match the map's hues: blue = opposition-leaning (balance ≤ {cfg.tendency.antiMax}), purple = balanced, red = coalition-leaning (≥ +{cfg.tendency.proMin}), gray = Arab-party plurality. Cut-offs are configurable in src/config/analysis.ts. Unweighted locality statistics. Differences between group averages do not show that political tendency caused the change in turnout — the groups also differ in size, demography, geography and in how complete their 2026 count is.
         </p>
       </section>
 
@@ -82,7 +82,7 @@ function Tile({ label, value, note }: { label: string; value: string; note?: str
   );
 }
 
-const GROUP_NAME: Record<string, string> = { anti: "Anti-Netanyahu", balanced: "Balanced", pro: "Pro-Netanyahu", gray: "Gray" };
+const GROUP_NAME: Record<string, string> = { anti: "Opposition", balanced: "Balanced", pro: "Netanyahu coalition", gray: "Gray" };
 
 /** Mean (bar from 0) and median (tick) per group on one symmetric pp axis. */
 function MeanMedianBars({ groups, cfg }: { groups: GroupSummary[]; cfg: AnalysisConfig }) {
@@ -125,7 +125,7 @@ function MeanMedianBars({ groups, cfg }: { groups: GroupSummary[]; cfg: Analysis
         <span>0 pp</span>
         <span>+{extent.toFixed(1)}</span>
       </div>
-      <p className="muted small">Gray = an Arab party was the most-voted single list in 2022, a categorical group rather than a point on the anti–pro axis. Group averages are unweighted across localities.</p>
+      <p className="muted small">Gray = an Arab party was the most-voted single list in 2022, a categorical group rather than a point on the opposition–coalition axis. Group averages are unweighted across localities.</p>
     </figure>
   );
 }
@@ -203,8 +203,8 @@ function Scatter({ shown, colors, hovered, onHover, onSelect, cfg }: { shown: Lo
           <text key={t} x={sx(t)} y={H - m.b + 14} textAnchor="middle" className="tick">{t > 0 ? `+${t}` : t}</text>
         ))}
         <line x1={sx(0)} x2={sx(0)} y1={m.t} y2={H - m.b} className="grid" />
-        <text x={m.l} y={H - 6} className="axis-label">← anti-Netanyahu</text>
-        <text x={m.l + plotW} y={H - 6} textAnchor="end" className="axis-label">pro-Netanyahu →</text>
+        <text x={m.l} y={H - 6} className="axis-label">← opposition</text>
+        <text x={m.l + plotW} y={H - 6} textAnchor="end" className="axis-label">Netanyahu coalition →</text>
         <text x={m.l + plotW / 2} y={H - 6} textAnchor="middle" className="axis-label">2022 balance</text>
         <text x={stripX + stripW / 2} y={H - m.b + 14} textAnchor="middle" className="tick">Arab</text>
         <text x={stripX + stripW / 2} y={H - m.b + 26} textAnchor="middle" className="tick">plurality</text>

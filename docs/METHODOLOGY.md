@@ -7,7 +7,7 @@ The explorer shows two independent properties of every Israeli locality:
 | **Hue** | 2022 political composition | 2022 results only | **No** |
 | **Lightness** | `turnout_change_pp = turnout_2026_pct − turnout_2022_pct` | Both elections | Yes (that is the point) |
 
-A dark red locality leaned pro-Netanyahu in 2022 **and** its turnout rose. A light blue locality leaned anti-Netanyahu in 2022 **and** its turnout fell. Darkness never means stronger political support.
+A dark red locality leaned toward the Netanyahu coalition in 2022 **and** its turnout rose. A light blue locality leaned toward the opposition in 2022 **and** its turnout fell. Darkness never means stronger political support.
 
 ## 1. Political classification (2022)
 
@@ -29,10 +29,12 @@ Implemented in `src/lib/classification.ts`. The party mapping is `config/parties
 
 ### Party groups
 
+The app labels the two blocs **Netanyahu coalition** (the lists that formed the 37th government after the 2022 election) and **Opposition** (the Zionist lists of the outgoing coalition that declared against a Netanyahu-led government). The Arab parties were also in opposition after 2022, but they are kept as their own group. The internal identifiers `pro_netanyahu` and `anti_netanyahu` are unchanged.
+
 | Group | 2022 lists (ballot letters) |
 |---|---|
-| `pro_netanyahu` | Likud (מחל), Religious Zionism (ט), Shas (שס), United Torah Judaism (ג) |
-| `anti_netanyahu` | Yesh Atid (פה), National Unity (כן), Yisrael Beiteinu (ל), Labor (אמת), Meretz (מרצ) |
+| `pro_netanyahu` (shown as **Netanyahu coalition**) | Likud (מחל), Religious Zionism (ט), Shas (שס), United Torah Judaism (ג) |
+| `anti_netanyahu` (shown as **Opposition**) | Yesh Atid (פה), National Unity (כן), Yisrael Beiteinu (ל), Labor (אמת), Meretz (מרצ) |
 | `arab_parties` | Ra'am (עם), Hadash–Ta'al (ום), Balad (ד) |
 | `other_or_unclassified` | Jewish Home (ב), see the note in the config file, and all 27 lists that won no seats and did not commit to a bloc |
 
@@ -89,9 +91,9 @@ The colors are built in **OKLCH**, a perceptual color space, so equal lightness 
 
   | Category | Balance | OKLCH hue |
   |---|---|---|
-  | Blue: anti-Netanyahu-leaning | ≤ −0.2 | 255 |
+  | Blue: opposition-leaning | ≤ −0.2 | 255 |
   | Purple: relatively balanced | between −0.2 and +0.2 | 321 |
-  | Red: pro-Netanyahu-leaning | ≥ +0.2 | 27 |
+  | Red: Netanyahu-coalition-leaning | ≥ +0.2 | 27 |
 
   Both cut-offs are inclusive on the outer side and live in `src/config/analysis.ts` (`TENDENCY`). The same object defines the dashboard's summary groups, so the map's colors and the group statistics always agree. With the current data the groups hold 576 blue, 116 purple and 397 red localities. Within a category the hue does not show how strong the lean is. The exact balance is still in the tooltip, the detail panel, the scatter plot and the balance filter.
 - **Hue (continuous, optional).** Set `hueMode: "continuous"` to make the hue linear in the balance, from blue (balance −1) through purple (0) to red (+1). The legend switches to nine balance columns automatically.
@@ -126,7 +128,7 @@ Implemented in `src/lib/stats.ts`.
 - **Unweighted mean and median** across localities. Each locality counts once, so this is *not* a national figure.
 - **Voter-weighted change.** `Σ voters₂₀₂₆ / Σ eligible₂₀₂₆ − Σ voters₂₀₂₂ / Σ eligible₂₀₂₂` over the localities currently shown.
 - **Increased / unchanged / decreased.** The "unchanged" band is |Δ| < 0.5 pp (`unchangedThresholdPp`).
-- **Groups**: anti-leaning (balance ≤ −0.2), balanced, pro-leaning (≥ +0.2), and gray, the same categories as the map's hues. The cut-offs are in `src/config/analysis.ts`. Box plots use Tukey whiskers at 1.5 × IQR.
+- **Groups**: opposition-leaning (balance ≤ −0.2), balanced, coalition-leaning (≥ +0.2), and gray, the same categories as the map's hues. The cut-offs are in `src/config/analysis.ts`. Box plots use Tukey whiskers at 1.5 × IQR.
 
 None of these comparisons is causal. The groups also differ in locality size, demography, geography, and 2026 count completeness, and the scatter plot and box plots show associations only.
 

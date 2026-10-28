@@ -59,17 +59,17 @@ export function boxStats(xs: number[]): BoxStats | null {
 export type TendencyGroup = "anti" | "balanced" | "pro" | "gray" | "unavailable";
 
 export const TENDENCY_LABELS: Record<TendencyGroup, string> = {
-  anti: "Anti-Netanyahu-leaning",
+  anti: "Opposition-leaning",
   balanced: "Politically balanced",
-  pro: "Pro-Netanyahu-leaning",
+  pro: "Netanyahu-coalition-leaning",
   gray: "Arab-party plurality (gray)",
   unavailable: "Balance unavailable",
 };
 
 export const TENDENCY_SHORT: Record<TendencyGroup, string> = {
-  anti: "Anti-leaning",
+  anti: "Opposition",
   balanced: "Balanced",
-  pro: "Pro-leaning",
+  pro: "Coalition",
   gray: "Arab plurality",
   unavailable: "Unavailable",
 };
