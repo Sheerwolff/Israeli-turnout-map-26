@@ -17,45 +17,6 @@
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Hebrew", Arial, sans-serif;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #15171b;
-    --surface: #1d2025;
-    --surface-2: #262a30;
-    --ink: #eceef1;
-    --ink-2: #c3c7ce;
-    --muted: #979ca6;
-    --line: #353a42;
-    --accent: #8fb0ff;
-    --warn-bg: #3a2f14;
-    --warn-ink: #f3d79a;
-    --bloc-anti: #6f97ee;
-    --bloc-pro: #ec7466;
-    --bloc-arab: #9a9a9a;
-    --bloc-other: #4a4d52;
-    --grid: #2c3037;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #15171b;
-  --surface: #1d2025;
-  --surface-2: #262a30;
-  --ink: #eceef1;
-  --ink-2: #c3c7ce;
-  --muted: #979ca6;
-  --line: #353a42;
-  --accent: #8fb0ff;
-  --warn-bg: #3a2f14;
-  --warn-ink: #f3d79a;
-  --grid: #2c3037;
-  --bloc-anti: #6f97ee;
-  --bloc-pro: #ec7466;
-  --bloc-arab: #9a9a9a;
-  --bloc-other: #4a4d52;
-  color-scheme: dark;
-}
-
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font); }

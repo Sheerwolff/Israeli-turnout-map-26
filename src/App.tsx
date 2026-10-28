@@ -15,27 +15,6 @@ import { Search } from "./components/Search";
 
 type Tab = "dashboard" | "locality" | "quality" | "method";
 
-/** Dark when the root carries data-theme="dark", or when no theme is set and the OS prefers dark. */
-function useDarkMode() {
-  const read = () => {
-    const t = document.documentElement.getAttribute("data-theme");
-    return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-  };
-  const [dark, setDark] = useState(read);
-  useEffect(() => {
-    const q = window.matchMedia("(prefers-color-scheme: dark)");
-    const f = () => setDark(read());
-    q.addEventListener("change", f);
-    const mo = new MutationObserver(f);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => {
-      q.removeEventListener("change", f);
-      mo.disconnect();
-    };
-  }, []);
-  return dark;
-}
-
 function bboxOf(geom: GeoJSON.Geometry): Bounds {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   const walk = (c: unknown): void => {
@@ -61,7 +40,6 @@ export function App() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const [basemap, setBasemap] = useState(true);
   const [flyTo, setFlyTo] = useState<{ bounds: Bounds; key: number } | null>(null);
-  const dark = useDarkMode();
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -167,7 +145,7 @@ export function App() {
           selected={selected}
           hovered={hovered ?? mapHover?.code ?? null}
           basemap={basemap}
-          dark={dark}
+          dark={false}
           flyTo={flyTo}
           onHover={(code, pt) => setMapHover(code !== null && pt ? { code, ...pt } : null)}
           onSelect={(c) => select(c)}
