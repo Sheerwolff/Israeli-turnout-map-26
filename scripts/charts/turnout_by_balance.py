@@ -22,7 +22,7 @@ from matplotlib.transforms import blended_transform_factory
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "public" / "data" / "dataset.json"
 OUT = ROOT / "docs" / "charts"
-CUT = (-0.1, 0.1)  # same cut-offs as src/config/analysis.ts
+from style import CUT  # shared with the other charts; matches src/config/analysis.ts
 
 # ---- Palette (validated: CVD ΔE ≥ 10.7, normal-vision ΔE ≥ 18.1, ≥ 3:1 on the surface) ----
 BG = "#fbfaf7"
