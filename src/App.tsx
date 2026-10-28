@@ -7,22 +7,31 @@ import { Dashboard } from "./components/Dashboard";
 import { FiltersPanel } from "./components/FiltersPanel";
 import { Legend, type LegendCell } from "./components/Legend";
 import { DetailPanel, TooltipContent } from "./components/LocalityInfo";
-import { ISRAEL_BOUNDS, MapView, type Bounds, type GeometryCollection } from "./components/MapView";
+import { BASEMAP_AVAILABLE, ISRAEL_BOUNDS, MapView, type Bounds, type GeometryCollection } from "./components/MapView";
 import { MethodPanel } from "./components/MethodPanel";
 import { QualityPanel } from "./components/QualityPanel";
 import { Search } from "./components/Search";
 
 type Tab = "dashboard" | "locality" | "quality" | "method";
 
+/** Dark when the root carries data-theme="dark", or when no theme is set and the OS prefers dark. */
 function useDarkMode() {
-  const q = typeof window !== "undefined" ? window.matchMedia("(prefers-color-scheme: dark)") : null;
-  const [dark, setDark] = useState(!!q?.matches);
+  const read = () => {
+    const t = document.documentElement.getAttribute("data-theme");
+    return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+  const [dark, setDark] = useState(read);
   useEffect(() => {
-    if (!q) return;
-    const f = (e: MediaQueryListEvent) => setDark(e.matches);
+    const q = window.matchMedia("(prefers-color-scheme: dark)");
+    const f = () => setDark(read());
     q.addEventListener("change", f);
-    return () => q.removeEventListener("change", f);
-  }, [q]);
+    const mo = new MutationObserver(f);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => {
+      q.removeEventListener("change", f);
+      mo.disconnect();
+    };
+  }, []);
   return dark;
 }
 
@@ -168,9 +177,11 @@ export function App() {
           >
             Reset view
           </button>
-          <label className="check">
-            <input type="checkbox" checked={basemap} onChange={(e) => setBasemap(e.target.checked)} /> Basemap
-          </label>
+          {BASEMAP_AVAILABLE && (
+            <label className="check">
+              <input type="checkbox" checked={basemap} onChange={(e) => setBasemap(e.target.checked)} /> Basemap
+            </label>
+          )}
         </div>
         {mapHover && hoverRec && (
           <div className="tooltip" style={{ left: mapHover.x + 14, top: mapHover.y + 14 }}>

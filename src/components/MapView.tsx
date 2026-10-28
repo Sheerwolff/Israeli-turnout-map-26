@@ -69,6 +69,9 @@ function hatchPattern(dark: boolean): ImageData {
   return new ImageData(data, size, size);
 }
 
+/** Set VITE_BASEMAP=off for hosts that block third-party tiles; the polygons then sit on a plain background. */
+export const BASEMAP_AVAILABLE = import.meta.env.VITE_BASEMAP !== "off";
+
 const tiles = (style: string) => ["a", "b", "c", "d"].map((s) => `https://${s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}.png`);
 
 export function MapView(props: Props) {
@@ -91,13 +94,15 @@ export function MapView(props: Props) {
       attributionControl: false,
       style: {
         version: 8,
-        sources: {
-          base: { type: "raster", tiles: tiles(dark ? "dark_nolabels" : "light_nolabels"), tileSize: 256, attribution: "© OpenStreetMap contributors © CARTO" },
-          labels: { type: "raster", tiles: tiles(dark ? "dark_only_labels" : "light_only_labels"), tileSize: 256 },
-        },
+        sources: BASEMAP_AVAILABLE
+          ? {
+              base: { type: "raster", tiles: tiles(dark ? "dark_nolabels" : "light_nolabels"), tileSize: 256, attribution: "© OpenStreetMap contributors © CARTO" },
+              labels: { type: "raster", tiles: tiles(dark ? "dark_only_labels" : "light_only_labels"), tileSize: 256 },
+            }
+          : {},
         layers: [
           { id: "bg", type: "background", paint: { "background-color": dark ? "#1b1d22" : "#f4f4f1" } },
-          { id: "base", type: "raster", source: "base", paint: { "raster-opacity": 0.85 } },
+          ...(BASEMAP_AVAILABLE ? [{ id: "base", type: "raster" as const, source: "base", paint: { "raster-opacity": 0.85 } }] : []),
         ],
       },
     });
@@ -150,7 +155,7 @@ export function MapView(props: Props) {
           "line-width": ["case", ["boolean", ["feature-state", "selected"], false], 3, ["boolean", ["feature-state", "hover"], false], 2, 0],
         },
       });
-      map.addLayer({ id: "labels", type: "raster", source: "labels", paint: { "raster-opacity": 0.9 } });
+      if (BASEMAP_AVAILABLE) map.addLayer({ id: "labels", type: "raster", source: "labels", paint: { "raster-opacity": 0.9 } });
       loaded.current = true;
       syncAll();
     });
@@ -170,8 +175,10 @@ export function MapView(props: Props) {
 
     function syncAll() {
       (map.getSource("loc") as GeoJSONSource).setData(buildFeatures(propsRef.current));
-      map.setLayoutProperty("base", "visibility", propsRef.current.basemap ? "visible" : "none");
-      map.setLayoutProperty("labels", "visibility", propsRef.current.basemap ? "visible" : "none");
+      if (BASEMAP_AVAILABLE) {
+        map.setLayoutProperty("base", "visibility", propsRef.current.basemap ? "visible" : "none");
+        map.setLayoutProperty("labels", "visibility", propsRef.current.basemap ? "visible" : "none");
+      }
     }
     (map as unknown as { __sync: () => void }).__sync = syncAll;
     return () => {
