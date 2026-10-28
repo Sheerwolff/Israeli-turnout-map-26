@@ -34,9 +34,28 @@ describe("hue from political balance", () => {
     expect(b).toBeGreaterThan(g); // purple: red and blue both above green
   });
 
-  it("is continuous: small balance changes give small hue changes", () => {
-    const step = Math.abs(balanceToHue(0.31, cfg) - balanceToHue(0.3, cfg));
+  it("default: hues are categorical — blue, purple, red — split at the configured cut-offs", () => {
+    expect(cfg.hueMode).toBe("categorical");
+    const hex = (b: number) => localityColor({ balance: b, changePp: 0, isArabPlurality: false }, cfg).hex;
+    const { antiMax, proMin } = cfg.categories;
+    expect(hex(-1)).toBe(hex(antiMax)); // cut-off is inclusive
+    expect(hex(antiMax + 0.001)).toBe(hex(0));
+    expect(hex(proMin - 0.001)).toBe(hex(0));
+    expect(hex(proMin)).toBe(hex(1));
+    expect(new Set([hex(-0.5), hex(0), hex(0.5)]).size).toBe(3);
+  });
+
+  it("categories match the dashboard's tendency groups", () => {
+    expect(cfg.categories).toBe(ANALYSIS_CONFIG.tendency);
+  });
+
+  it("continuous mode: small balance changes give small hue changes", () => {
+    const cont: ColorScaleConfig = { ...cfg, hueMode: "continuous" };
+    const step = Math.abs(balanceToHue(0.31, cont) - balanceToHue(0.3, cont));
     expect(step).toBeLessThan(1);
+    const a = localityColor({ balance: 0.3, changePp: 0, isArabPlurality: false }, cont).hue!;
+    const b = localityColor({ balance: 0.9, changePp: 0, isArabPlurality: false }, cont).hue!;
+    expect(a).not.toBe(b);
   });
 
   it("does not depend on turnout change", () => {

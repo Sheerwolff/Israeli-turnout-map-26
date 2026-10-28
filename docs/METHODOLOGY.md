@@ -85,7 +85,17 @@ color = f(political_balance, turnout_change_pp, is_arab_party_plurality)
 
 The colors are built in **OKLCH**, a perceptual color space, so equal lightness values look equally light whatever the hue.
 
-- **Hue.** Linear in the balance, from blue (OKLCH hue 255, balance −1) through purple (balance 0) to red (hue 27, balance +1). The midpoint is purple rather than gray, because gray is reserved for the Arab-plurality category. The hue is continuous and has no discrete political categories.
+- **Hue (categorical, the default).** Each non-gray locality takes one of three hues from its balance:
+
+  | Category | Balance | OKLCH hue |
+  |---|---|---|
+  | Blue: anti-Netanyahu-leaning | ≤ −0.2 | 255 |
+  | Purple: relatively balanced | between −0.2 and +0.2 | 321 |
+  | Red: pro-Netanyahu-leaning | ≥ +0.2 | 27 |
+
+  Both cut-offs are inclusive on the outer side and live in `src/config/analysis.ts` (`TENDENCY`). The same object defines the dashboard's summary groups, so the map's colors and the group statistics always agree. With the current data the groups hold 576 blue, 116 purple and 397 red localities. Within a category the hue does not show how strong the lean is. The exact balance is still in the tooltip, the detail panel, the scatter plot and the balance filter.
+- **Hue (continuous, optional).** Set `hueMode: "continuous"` to make the hue linear in the balance, from blue (balance −1) through purple (0) to red (+1). The legend switches to nine balance columns automatically.
+- **Why purple, not gray, for balanced.** Gray is reserved for the Arab-plurality category.
 - **Gray.** Chroma 0, with the **same** lightness function. The same turnout change gives the same lightness for gray, blue, purple and red localities. The tests check this on the rendered sRGB values.
 - **Lightness.**
 
@@ -116,7 +126,7 @@ Implemented in `src/lib/stats.ts`.
 - **Unweighted mean and median** across localities. Each locality counts once, so this is *not* a national figure.
 - **Voter-weighted change.** `Σ voters₂₀₂₆ / Σ eligible₂₀₂₆ − Σ voters₂₀₂₂ / Σ eligible₂₀₂₂` over the localities currently shown.
 - **Increased / unchanged / decreased.** The "unchanged" band is |Δ| < 0.5 pp (`unchangedThresholdPp`).
-- **Summary groups**, for the dashboard only: anti-leaning (balance ≤ −0.2), balanced, pro-leaning (≥ +0.2), and gray. The cut-offs are in `src/config/analysis.ts`. Box plots use Tukey whiskers at 1.5 × IQR.
+- **Groups**: anti-leaning (balance ≤ −0.2), balanced, pro-leaning (≥ +0.2), and gray, the same categories as the map's hues. The cut-offs are in `src/config/analysis.ts`. Box plots use Tukey whiskers at 1.5 × IQR.
 
 None of these comparisons is causal. The groups also differ in locality size, demography, geography, and 2026 count completeness, and the scatter plot and box plots show associations only.
 

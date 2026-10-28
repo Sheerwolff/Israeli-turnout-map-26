@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ANALYSIS_CONFIG, type AnalysisConfig } from "./config/analysis";
 import { localityColor, type ColorResult } from "./lib/color";
 import { DEFAULT_FILTERS, passesFilters, type Filters } from "./lib/filters";
+import { tendencyGroup } from "./lib/stats";
 import type { Dataset, LocalityRecord, PartyDef } from "./lib/types";
 import { Dashboard } from "./components/Dashboard";
 import { FiltersPanel } from "./components/FiltersPanel";
@@ -94,14 +95,21 @@ export function App() {
     if (l.turnoutChangePp < cell.changeLo || l.turnoutChangePp >= cell.changeHi) return false;
     if (cell.kind === "gray") return c.isArabPlurality;
     if (c.isArabPlurality || c.balance === null) return false;
+    if (cell.group) return tendencyGroup(l, cfg.tendency) === cell.group;
     return c.balance >= cell.balanceLo && (c.balance < cell.balanceHi || (cell.balanceHi >= 1 && c.balance <= 1));
-  }, []);
+  }, [cfg.tendency]);
   const highlight = useMemo(() => (legendCell ? new Set(shown.filter((l) => inCell(l, legendCell)).map((l) => l.code)) : null), [legendCell, shown, inCell]);
   const countFor = useCallback((cell: LegendCell) => shown.filter((l) => inCell(l, cell)).length, [shown, inCell]);
 
   const gradient = useMemo(() => {
-    const stops = Array.from({ length: 11 }, (_, i) => -1 + i * 0.2).map((b) => localityColor({ balance: b, changePp: 0, isArabPlurality: false }, cfg.color).hex);
-    return `linear-gradient(to right, ${stops.join(", ")})`;
+    const at = (b: number) => localityColor({ balance: b, changePp: 0, isArabPlurality: false }, cfg.color).hex;
+    if (cfg.color.hueMode === "categorical") {
+      // Hard stops at the category cut-offs, positioned on the −1…+1 gauge.
+      const pos = (b: number) => `${((b + 1) / 2) * 100}%`;
+      const { antiMax, proMin } = cfg.color.categories;
+      return `linear-gradient(to right, ${at(-1)} 0 ${pos(antiMax)}, ${at(0)} ${pos(antiMax)} ${pos(proMin)}, ${at(1)} ${pos(proMin)} 100%)`;
+    }
+    return `linear-gradient(to right, ${Array.from({ length: 11 }, (_, i) => at(-1 + i * 0.2)).join(", ")})`;
   }, [cfg.color]);
 
   const select = useCallback(

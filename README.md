@@ -2,7 +2,7 @@
 
 An interactive analytical map of Israeli localities. Each locality's color encodes two independent things:
 
-- **Hue: how it voted in 2022.** Continuous from blue (anti-Netanyahu) through purple to red (pro-Netanyahu), using `political_balance = (pro − anti) / (pro + anti)`. Localities where an Arab party was the single most-voted-for party are **gray**. The hue never depends on 2026 votes.
+- **Hue: how it voted in 2022.** Four categories from `political_balance = (pro − anti) / (pro + anti)`: **blue** for anti-Netanyahu-leaning (≤ −0.2), **purple** for relatively balanced, **red** for pro-Netanyahu-leaning (≥ +0.2), and **gray** where an Arab party was the single most-voted-for party. The hue never depends on 2026 votes. A continuous blue → purple → red scale is available as a config option.
 - **Lightness: change in turnout from 2022 to 2026, in percentage points.** Darker means turnout rose; lighter means it fell. The scale is symmetric, shared by every locality, and configurable.
 
 The app answers one question: *did turnout change differently across localities with different 2022 political compositions?* It provides a two-dimensional interactive legend, hover tooltips, a detail panel for each locality, search in Hebrew and English, filters, a dashboard (overall change, a scatter plot of balance against change, group box plots), and a data-quality report that lists every unmatched or excluded locality.

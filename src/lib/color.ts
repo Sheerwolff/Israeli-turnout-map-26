@@ -1,6 +1,7 @@
 // Two-dimensional color encoding:
-//   hue       ← 2022 political balance (blue = anti, red = pro, purple between;
-//               gray for an Arab-party plurality)
+//   hue       ← 2022 political balance: categorical by default (blue = anti-leaning,
+//               purple = balanced, red = pro-leaning), or continuous blue → purple → red;
+//               gray for an Arab-party plurality
 //   lightness ← 2022→2026 turnout change in pp (same scale for every hue)
 // Built in OKLCH so equal lightness values look equally light across hues.
 
@@ -44,6 +45,14 @@ export function changeToLightness(changePp: number, cfg: ColorScaleConfig): { li
   return { lightness: cfg.neutralLightness + sign * s * cfg.lightnessSpan, clipped };
 }
 
+/** Hue for a balance under the configured mode: three categories, or the continuous scale. */
+export function hueForBalance(balance: number, cfg: ColorScaleConfig): number {
+  if (cfg.hueMode === "continuous") return balanceToHue(balance, cfg);
+  if (balance <= cfg.categories.antiMax) return cfg.hueAnti;
+  if (balance >= cfg.categories.proMin) return cfg.huePro;
+  return cfg.hueBalanced;
+}
+
 /** The deterministic color function: color = f(political_balance, turnout_change_pp, is_arab_party_plurality). */
 export function localityColor(input: ColorInput, cfg: ColorScaleConfig): ColorResult {
   if (input.changePp === null || !Number.isFinite(input.changePp)) {
@@ -56,7 +65,7 @@ export function localityColor(input: ColorInput, cfg: ColorScaleConfig): ColorRe
   if (input.balance === null || !Number.isFinite(input.balance)) {
     return { hex: null, kind: "no_balance", hue: null, lightness, clipped };
   }
-  const hue = balanceToHue(input.balance, cfg);
+  const hue = hueForBalance(input.balance, cfg);
   return { hex: oklchToHex(lightness, cfg.chroma, hue), kind: "bloc", hue, lightness, clipped };
 }
 

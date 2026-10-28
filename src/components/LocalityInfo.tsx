@@ -1,4 +1,6 @@
+import { ANALYSIS_CONFIG } from "../config/analysis";
 import type { ColorResult } from "../lib/color";
+import { tendencyGroup } from "../lib/stats";
 import { fmtBalance, fmtInt, fmtPct, fmtPp, fmtShare, POPULATION_GROUP_EN, WARNING_SHORT, WARNING_TEXT } from "../lib/format";
 import type { LocalityRecord, PartyDef, PartyGroup } from "../lib/types";
 
@@ -18,7 +20,10 @@ export function classificationText(r: LocalityRecord): string {
   const c = r.classification;
   if (!c) return "Not classified (no 2022 results)";
   if (c.category === "arab_plurality") return "Gray — Arab-party plurality in 2022";
-  if (c.category === "bloc_balance") return "Blue–red political balance (2022)";
+  if (c.category === "bloc_balance") {
+    const g = tendencyGroup(r, ANALYSIS_CONFIG.tendency);
+    return g === "anti" ? "Blue — anti-Netanyahu-leaning (2022)" : g === "pro" ? "Red — pro-Netanyahu-leaning (2022)" : "Purple — relatively balanced (2022)";
+  }
   return "Political balance unavailable";
 }
 

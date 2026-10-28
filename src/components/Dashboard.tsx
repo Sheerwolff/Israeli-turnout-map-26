@@ -59,7 +59,7 @@ export function Dashboard({ shown, excludedCount, filteredOut, meta, cfg, colors
         <GroupTable groups={groups} />
         <BoxPlots groups={groups} />
         <p className="small muted">
-          Summary groups only (the map stays continuous): anti-leaning balance ≤ {cfg.tendency.antiMax}, pro-leaning ≥ +{cfg.tendency.proMin}, balanced in between (configurable in src/config/analysis.ts). Unweighted locality statistics. Differences between group averages do not show that political tendency caused the change in turnout — the groups also differ in size, demography, geography and in how complete their 2026 count is.
+          Groups match the map's hues: blue = anti-leaning (balance ≤ {cfg.tendency.antiMax}), purple = balanced, red = pro-leaning (≥ +{cfg.tendency.proMin}), gray = Arab-party plurality. Cut-offs are configurable in src/config/analysis.ts. Unweighted locality statistics. Differences between group averages do not show that political tendency caused the change in turnout — the groups also differ in size, demography, geography and in how complete their 2026 count is.
         </p>
       </section>
 

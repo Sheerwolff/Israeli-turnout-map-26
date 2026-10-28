@@ -14,7 +14,11 @@ export function MethodPanel({ dataset, cfg }: { dataset: Dataset; cfg: AnalysisC
       <ol>
         <li>The individual party with the most valid votes is the locality's top party.</li>
         <li>If that party is an Arab party, the locality is <strong>gray</strong>, whatever its share. Arab parties' combined share does not matter. Ties: gray only if every tied party is Arab; ties are always flagged.</li>
-        <li>Otherwise, <code>balance = (pro − anti) ÷ (pro + anti)</code> sets a continuous hue from blue (−1) through purple (0) to red (+1). With no bloc votes the balance is unavailable and no hue is invented.</li>
+        <li>Otherwise, <code>balance = (pro − anti) ÷ (pro + anti)</code> sets the hue:{" "}
+          {cfg.color.hueMode === "categorical"
+            ? <>blue for anti-Netanyahu-leaning (≤ {cfg.color.categories.antiMax}), purple for relatively balanced, red for pro-Netanyahu-leaning (≥ +{cfg.color.categories.proMin}).</>
+            : <>a continuous scale from blue (−1) through purple (0) to red (+1).</>}{" "}
+          With no bloc votes the balance is unavailable and no hue is invented.</li>
       </ol>
 
       <h3>Turnout</h3>
