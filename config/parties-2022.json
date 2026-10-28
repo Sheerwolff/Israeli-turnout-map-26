@@ -1,0 +1,56 @@
+{
+  "election": "Knesset 25 (1 November 2022)",
+  "description": "Single source of truth for the party-group mapping used to classify localities. Keys are the official CEC ballot letters (the column headers of expc.csv / expb.csv). Every letter that appears in the 2022 results file must be listed here; the data pipeline fails if a letter is missing, and reports any letter listed here that has no column.",
+  "groups": {
+    "pro_netanyahu": "Lists that ran in 2022 as part of the bloc supporting Benjamin Netanyahu for prime minister and later formed the 37th government (Likud, Religious Zionism, Shas, United Torah Judaism).",
+    "anti_netanyahu": "Lists that ran in 2022 as part of the outgoing Bennett–Lapid coalition's Jewish/Zionist parties and declared they would not support a Netanyahu-led government (Yesh Atid, National Unity, Yisrael Beiteinu, Labor, Meretz).",
+    "arab_parties": "The three Arab-led lists that ran in 2022 (Ra'am / United Arab List, Hadash–Ta'al, Balad). Kept separate from both blocs by design; used for the gray Arab-plurality rule.",
+    "other_or_unclassified": "Every other list, including lists whose bloc alignment was disputed and all lists that won no seats and did not commit to a bloc. Excluded from the political-balance denominator."
+  },
+  "parties": [
+    { "letter": "מחל", "name_he": "הליכוד", "name_en": "Likud", "group": "pro_netanyahu" },
+    { "letter": "ט", "name_he": "הציונות הדתית", "name_en": "Religious Zionism (incl. Otzma Yehudit, Noam)", "group": "pro_netanyahu" },
+    { "letter": "שס", "name_he": "ש\"ס", "name_en": "Shas", "group": "pro_netanyahu" },
+    { "letter": "ג", "name_he": "יהדות התורה", "name_en": "United Torah Judaism", "group": "pro_netanyahu" },
+
+    { "letter": "פה", "name_he": "יש עתיד", "name_en": "Yesh Atid", "group": "anti_netanyahu" },
+    { "letter": "כן", "name_he": "המחנה הממלכתי", "name_en": "National Unity", "group": "anti_netanyahu" },
+    { "letter": "ל", "name_he": "ישראל ביתנו", "name_en": "Yisrael Beiteinu", "group": "anti_netanyahu" },
+    { "letter": "אמת", "name_he": "העבודה", "name_en": "Labor", "group": "anti_netanyahu" },
+    { "letter": "מרצ", "name_he": "מרצ", "name_en": "Meretz", "group": "anti_netanyahu" },
+
+    { "letter": "עם", "name_he": "רע\"ם", "name_en": "Ra'am (United Arab List)", "group": "arab_parties" },
+    { "letter": "ום", "name_he": "חד\"ש-תע\"ל", "name_en": "Hadash–Ta'al", "group": "arab_parties" },
+    { "letter": "ד", "name_he": "בל\"ד", "name_en": "Balad", "group": "arab_parties" },
+
+    { "letter": "ב", "name_he": "הבית היהודי", "name_en": "Jewish Home (Shaked)", "group": "other_or_unclassified", "note": "Bloc alignment was disputed during the campaign (did not join either bloc's agreements). Deliberately left unclassified; it fell below the threshold. Reassign here if you adopt a different convention — the change is reflected everywhere." },
+    { "letter": "אצ", "name_he": "חופש כלכלי", "name_en": "Economic Freedom", "group": "other_or_unclassified" },
+    { "letter": "ז", "name_he": "שחר כוח חברתי", "name_en": "Shahar Social Power", "group": "other_or_unclassified" },
+    { "letter": "זך", "name_he": "קמ\"ה - קידום מעמד הפרט", "name_en": "KAMA", "group": "other_or_unclassified" },
+    { "letter": "זנ", "name_he": "כח להשפיע", "name_en": "Ko'ah Lehashpi'a", "group": "other_or_unclassified" },
+    { "letter": "זץ", "name_he": "צומת", "name_en": "Tzomet", "group": "other_or_unclassified" },
+    { "letter": "י", "name_he": "ישראל חופשית דמוקרטית", "name_en": "Free Democratic Israel", "group": "other_or_unclassified" },
+    { "letter": "יז", "name_he": "הכלכלית החדשה", "name_en": "New Economic Party", "group": "other_or_unclassified" },
+    { "letter": "ינ", "name_he": "איחוד בני הברית", "name_en": "Union of Allies", "group": "other_or_unclassified" },
+    { "letter": "יץ", "name_he": "צו השעה", "name_en": "Tzav HaSha'a", "group": "other_or_unclassified" },
+    { "letter": "יק", "name_he": "הגוש התנ\"כי", "name_en": "Biblical Bloc", "group": "other_or_unclassified" },
+    { "letter": "ך", "name_he": "אני ואתה", "name_en": "Ani VeAta", "group": "other_or_unclassified" },
+    { "letter": "נז", "name_he": "כבוד האדם", "name_en": "Human Dignity", "group": "other_or_unclassified" },
+    { "letter": "ני", "name_he": "נתיב", "name_en": "Nativ", "group": "other_or_unclassified" },
+    { "letter": "נף", "name_he": "מפלגת שמע", "name_en": "Shema", "group": "other_or_unclassified" },
+    { "letter": "נץ", "name_he": "העצמאים החדשים", "name_en": "New Independents", "group": "other_or_unclassified" },
+    { "letter": "נק", "name_he": "יש כיוון", "name_en": "Yesh Kivun", "group": "other_or_unclassified" },
+    { "letter": "נר", "name_he": "אנחנו", "name_en": "Anachnu", "group": "other_or_unclassified" },
+    { "letter": "ף", "name_he": "הפיראטים", "name_en": "Pirate Party", "group": "other_or_unclassified" },
+    { "letter": "צ", "name_he": "צעירים בוערים", "name_en": "Tze'irim Bo'arim", "group": "other_or_unclassified" },
+    { "letter": "ץ", "name_he": "מנהיגות חברתית", "name_en": "Social Leadership", "group": "other_or_unclassified" },
+    { "letter": "ק", "name_he": "קול הסביבה והחי", "name_en": "Voice of Environment and Animals", "group": "other_or_unclassified" },
+    { "letter": "קי", "name_he": "הלב היהודי", "name_en": "Jewish Heart", "group": "other_or_unclassified" },
+    { "letter": "קך", "name_he": "סדר חדש", "name_en": "New Order", "group": "other_or_unclassified" },
+    { "letter": "קנ", "name_he": "כל קול קובע", "name_en": "Every Vote Counts", "group": "other_or_unclassified" },
+    { "letter": "קץ", "name_he": "באומץ בשבילך", "name_en": "Be'ometz Bishvilcha", "group": "other_or_unclassified" },
+    { "letter": "רז", "name_he": "רשימת שלושים/ארבעים", "name_en": "30/40 List", "group": "other_or_unclassified" },
+    { "letter": "ת", "name_he": "דעת טוב ורע", "name_en": "Da'at Tov VeRa", "group": "other_or_unclassified" }
+  ],
+  "name_sources": "Names of the 13 lists with ≥1% of the vote are as published by the CEC. Names of the smaller lists were taken from a public third-party mirror (harelc/elections-vote-transfer, party_config.py) and should be checked against the CEC candidate-lists publication; they do not affect any calculation because all of them are other_or_unclassified."
+}

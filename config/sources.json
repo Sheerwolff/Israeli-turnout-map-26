@@ -1,0 +1,41 @@
+{
+  "mode": "official_partial",
+  "modeNote": "2026 figures come from the CEC partial count (snapshot 28 Oct 2026, 12:41 UTC), with the CEC 22:00 election-day turnout feed used for ballot boxes not yet counted. They will change when the count is final. Replace data/raw/2026/expb.csv (or point results2026 at the final expc.csv), set mode to official_final and run `npm run build:data`.",
+  "results2022": {
+    "path": "data/raw/2022/expc.csv",
+    "label": "2022 results by locality (Knesset 25)",
+    "origin": "Central Elections Committee, Knesset 25 final results by locality (expc.csv), supplied by the project owner",
+    "notes": "Matches the official national totals: 6,788,804 eligible, 4,794,593 votes, 4,764,742 valid (70.63%)."
+  },
+  "results2022Boxes": {
+    "path": "data/raw/2022/expb.csv",
+    "label": "2022 results by ballot box (Knesset 25)",
+    "origin": "Central Elections Committee, Knesset 25 final results by ballot box (expb.csv), supplied by the project owner",
+    "notes": "Used only to cross-check the locality file."
+  },
+  "results2026": {
+    "path": "data/raw/2026/expb.csv",
+    "label": "2026 results by ballot box (Knesset 26, partial count)",
+    "origin": "Central Elections Committee results feed (media26.bechirot.gov.il/files/expb.csv), as mirrored by the public repository github.com/harelc/elections-vote-transfer (ballot26.csv, commit 8dd817b, 2026-10-28 12:40 UTC; status file: 'Partial count, Central Elections Committee', 11,168 of 12,018 boxes)",
+    "notes": "Partial and unofficial until the CEC publishes final results. Not independently re-downloaded from the CEC (the CEC site is not reachable from the build environment)."
+  },
+  "feed2026": {
+    "path": "data/raw/2026/turnout-feed-2200.csv",
+    "label": "2026 election-day turnout by ballot box, 22:00 report",
+    "origin": "Central Elections Committee election-day turnout report by ballot box (22:00), supplied by the project owner",
+    "notes": "Windows-1255 encoded. Preliminary figures reported by polling-station committees; each box carries the time of its last update. The final row (code 99999, 'מדגם ארצי') is a national sample estimate and is not used for any locality.",
+    "encoding": "windows-1255"
+  },
+  "roster2026": {
+    "path": "data/raw/2026/stations-roster.csv",
+    "label": "2026 ballot-box roster",
+    "origin": "Central Elections Committee polling-station list for Knesset 26 (stations.xlsx), as mirrored by github.com/harelc/elections-vote-transfer (data/k26_cec/stations.xlsx); converted with scripts/geo/convert_roster.py",
+    "notes": "12,018 boxes, 7,331,981 eligible voters. Used only to measure how much of each locality's electorate the 2026 data cover."
+  },
+  "geometry": {
+    "path": "data/geo/localities.geojson",
+    "label": "Locality boundaries",
+    "origin": "Central Bureau of Statistics, statistical areas 2011 with 2019 demography (statisticalareas_demography2019.gdb, cbs.gov.il geo layers), dissolved by locality code with scripts/geo/build_geometry.py",
+    "notes": "Polygons are the CBS statistical-area extents of each locality (built-up and attached land), not municipal jurisdiction. Localities founded or recoded after the layer was produced have no polygon."
+  }
+}
