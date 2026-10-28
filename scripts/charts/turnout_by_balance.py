@@ -22,7 +22,7 @@ from matplotlib.transforms import blended_transform_factory
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "public" / "data" / "dataset.json"
 OUT = ROOT / "docs" / "charts"
-CUT = (-0.2, 0.2)  # same cut-offs as src/config/analysis.ts
+CUT = (-0.1, 0.1)  # same cut-offs as src/config/analysis.ts
 
 # ---- Palette (validated: CVD ΔE ≥ 10.7, normal-vision ΔE ≥ 18.1, ≥ 3:1 on the surface) ----
 BG = "#fbfaf7"
@@ -91,7 +91,7 @@ for a in (ax, axg):
 
 # ---- Main panel: blue / purple / red localities ----
 ax.set_xlim(-1.02, 1.02)
-ax.axvspan(-0.2, 0.2, color=BAND, zorder=0, lw=0)
+ax.axvspan(CUT[0], CUT[1], color=BAND, zorder=0, lw=0)
 order = sorted(bloc, key=lambda r: -r["eligible"])  # big dots underneath
 ax.scatter(
     [r["balance"] for r in order],
@@ -107,13 +107,13 @@ ax.scatter(
 # Group medians across each band.
 DARK = {"anti": "#163f86", "bal": "#62215c", "pro": "#8c2219", "gray": "#3d3d3d"}
 halo = [pe.Stroke(linewidth=5.2, foreground=BG), pe.Normal()]
-for g, (x0, x1) in {"anti": (-1, -0.2), "bal": (-0.2, 0.2), "pro": (0.2, 1)}.items():
+for g, (x0, x1) in {"anti": (-1, CUT[0]), "bal": (CUT[0], CUT[1]), "pro": (CUT[1], 1)}.items():
     ax.plot([x0 + 0.02, x1 - 0.02], [med[g]] * 2, color=DARK[g], lw=2.4, solid_capstyle="round", zorder=6, path_effects=halo)
 
 band_labels = {
-    "anti": (-0.6, "Opposition-leaning", "balance ≤ −0.2"),
-    "bal": (0.0, "Balanced", "−0.2 to +0.2"),
-    "pro": (0.6, "Netanyahu coalition-leaning", "balance ≥ +0.2"),
+    "anti": (-0.55, "Opposition-leaning", f"balance ≤ −{-CUT[0]:g}"),
+    "bal": (0.0, "Balanced", f"−{-CUT[0]:g} to +{CUT[1]:g}"),
+    "pro": (0.55, "Netanyahu coalition-leaning", f"balance ≥ +{CUT[1]:g}"),
 }
 tr = blended_transform_factory(ax.transData, ax.transAxes)
 for g, (x, name, rng) in band_labels.items():

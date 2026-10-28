@@ -91,11 +91,11 @@ The colors are built in **OKLCH**, a perceptual color space, so equal lightness 
 
   | Category | Balance | OKLCH hue |
   |---|---|---|
-  | Blue: opposition-leaning | ≤ −0.2 | 255 |
-  | Purple: relatively balanced | between −0.2 and +0.2 | 321 |
-  | Red: Netanyahu-coalition-leaning | ≥ +0.2 | 27 |
+  | Blue: opposition-leaning | ≤ −0.1 | 255 |
+  | Purple: relatively balanced | between −0.1 and +0.1 | 321 |
+  | Red: Netanyahu-coalition-leaning | ≥ +0.1 | 27 |
 
-  Both cut-offs are inclusive on the outer side and live in `src/config/analysis.ts` (`TENDENCY`). The same object defines the dashboard's summary groups, so the map's colors and the group statistics always agree. With the current data the groups hold 576 blue, 116 purple and 397 red localities. Within a category the hue does not show how strong the lean is. The exact balance is still in the tooltip, the detail panel, the scatter plot and the balance filter.
+  Both cut-offs are inclusive on the outer side and live in `src/config/analysis.ts` (`TENDENCY`). The same object defines the dashboard's summary groups, so the map's colors and the group statistics always agree. A balance of ±0.1 means the larger bloc has at most 55% of the two blocs' combined vote (55/45), i.e. a gap of up to 10 points. The band was narrowed from ±0.2 (60/40) at the project owner's request, since a 20-point gap is not balanced. With the current data the groups hold 604 blue, 56 purple and 429 red localities. Within a category the hue does not show how strong the lean is. The exact balance is still in the tooltip, the detail panel, the scatter plot and the balance filter.
 - **Hue (continuous, optional).** Set `hueMode: "continuous"` to make the hue linear in the balance, from blue (balance −1) through purple (0) to red (+1). The legend switches to nine balance columns automatically.
 - **Why purple, not gray, for balanced.** Gray is reserved for the Arab-plurality category.
 - **Gray.** Chroma 0, with the **same** lightness function. The same turnout change gives the same lightness for gray, blue, purple and red localities. The tests check this on the rendered sRGB values.
@@ -128,7 +128,7 @@ Implemented in `src/lib/stats.ts`.
 - **Unweighted mean and median** across localities. Each locality counts once, so this is *not* a national figure.
 - **Voter-weighted change.** `Σ voters₂₀₂₆ / Σ eligible₂₀₂₆ − Σ voters₂₀₂₂ / Σ eligible₂₀₂₂` over the localities currently shown.
 - **Increased / unchanged / decreased.** The "unchanged" band is |Δ| < 0.5 pp (`unchangedThresholdPp`).
-- **Groups**: opposition-leaning (balance ≤ −0.2), balanced, coalition-leaning (≥ +0.2), and gray, the same categories as the map's hues. The cut-offs are in `src/config/analysis.ts`. Box plots use Tukey whiskers at 1.5 × IQR.
+- **Groups**: opposition-leaning (balance ≤ −0.1), balanced, coalition-leaning (≥ +0.1), and gray, the same categories as the map's hues. The cut-offs are in `src/config/analysis.ts`. Box plots use Tukey whiskers at 1.5 × IQR.
 
 None of these comparisons is causal. The groups also differ in locality size, demography, geography, and 2026 count completeness, and the scatter plot and box plots show associations only.
 

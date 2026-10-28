@@ -49,7 +49,9 @@ export interface AnalysisConfig {
   scaleBoundChoices: number[];
 }
 
-const TENDENCY: TendencyCutoffs = { antiMax: -0.2, proMin: 0.2 };
+// ±0.1 = a gap of up to 10 points between the blocs' shares of their combined vote
+// (55/45 or closer counts as balanced).
+const TENDENCY: TendencyCutoffs = { antiMax: -0.1, proMin: 0.1 };
 
 export const ANALYSIS_CONFIG: AnalysisConfig = {
   color: {
