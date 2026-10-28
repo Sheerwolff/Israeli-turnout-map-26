@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { AnalysisConfig } from "../config/analysis";
-import type { ColorResult } from "../lib/color";
+import { localityColor, type ColorResult } from "../lib/color";
 import { fmtInt, fmtPct, fmtPp } from "../lib/format";
 import { groupSummaries, overallSummary, TENDENCY_LABELS, TENDENCY_SHORT, type GroupSummary } from "../lib/stats";
 import type { DatasetMeta, LocalityRecord } from "../lib/types";
@@ -56,6 +56,7 @@ export function Dashboard({ shown, excludedCount, filteredOut, meta, cfg, colors
 
       <section>
         <h3>C. Comparison by political tendency</h3>
+        <MeanMedianBars groups={groups} cfg={cfg} />
         <GroupTable groups={groups} />
         <BoxPlots groups={groups} />
         <p className="small muted">
@@ -78,6 +79,54 @@ function Tile({ label, value, note }: { label: string; value: string; note?: str
       <div className="tile-value">{value}</div>
       {note && <div className="tile-note">{note}</div>}
     </div>
+  );
+}
+
+const GROUP_NAME: Record<string, string> = { anti: "Anti-Netanyahu", balanced: "Balanced", pro: "Pro-Netanyahu", gray: "Gray" };
+
+/** Mean (bar from 0) and median (tick) per group on one symmetric pp axis. */
+function MeanMedianBars({ groups, cfg }: { groups: GroupSummary[]; cfg: AnalysisConfig }) {
+  // Group swatches use the map's hue for each group at the "no change" lightness.
+  const swatch = (g: string) =>
+    localityColor({ balance: g === "anti" ? -1 : g === "pro" ? 1 : 0, changePp: 0, isArabPlurality: g === "gray" }, cfg.color).hex!;
+  const extent = Math.max(1, ...groups.flatMap((g) => [Math.abs(g.meanChangePp ?? 0), Math.abs(g.medianChangePp ?? 0)])) * 1.03;
+  const pos = (v: number) => `${50 + (v / extent) * 50}%`;
+  return (
+    <figure className="mmbars">
+      <figcaption>
+        <strong>Turnout change by 2022 bloc</strong>
+        <span className="muted small">Mean (bar) and median (tick) turnout change per group of localities, grouped by their 2022 classification only.</span>
+      </figcaption>
+      {groups.map((g) => {
+        const mean = g.meanChangePp;
+        const med = g.medianChangePp;
+        return (
+          <div key={g.group} className="mm-row">
+            <div className="mm-head">
+              <span className="mm-dot" style={{ background: swatch(g.group) }} />
+              <span className="mm-name">{GROUP_NAME[g.group]}</span>
+              <span className="muted small">n={g.n}</span>
+              <span className="mm-val">{fmtPp(mean)}</span>
+            </div>
+            <div className="mm-track" title={`Mean ${fmtPp(mean)}, median ${fmtPp(med)}`}>
+              {mean !== null && (
+                <span
+                  className="mm-bar"
+                  style={{ background: swatch(g.group), left: mean >= 0 ? "50%" : pos(mean), right: mean >= 0 ? `calc(100% - ${pos(mean)})` : "50%" }}
+                />
+              )}
+              {med !== null && <span className="mm-tick" style={{ left: pos(med) }} />}
+            </div>
+          </div>
+        );
+      })}
+      <div className="mm-axis">
+        <span>−{extent.toFixed(1)}</span>
+        <span>0 pp</span>
+        <span>+{extent.toFixed(1)}</span>
+      </div>
+      <p className="muted small">Gray = an Arab party was the most-voted single list in 2022, a categorical group rather than a point on the anti–pro axis. Group averages are unweighted across localities.</p>
+    </figure>
   );
 }
 

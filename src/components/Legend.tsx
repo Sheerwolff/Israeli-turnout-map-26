@@ -26,7 +26,7 @@ interface Props {
 }
 
 const CONTINUOUS_COLS = 9;
-const ROWS = 7;
+const ROWS = 9;
 const CELL = 22;
 
 export function Legend({ cfg, boundChoices, onBoundChange, onDirectionToggle, onHighlight, countFor }: Props) {

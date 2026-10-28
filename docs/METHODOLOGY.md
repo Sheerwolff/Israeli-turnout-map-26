@@ -100,7 +100,7 @@ The colors are built in **OKLCH**, a perceptual color space, so equal lightness 
 - **Lightness.**
 
   ```
-  L = 0.67 − 0.23 × clamp(Δ / max, −1, 1)
+  L = 0.63 − 0.31 × clamp(Δ / max, −1, 1)
   ```
 
   This is symmetric around zero, with darker meaning increase. The direction, neutral lightness and span are set in `src/config/analysis.ts`. The direction can also be flipped from the legend.
@@ -117,7 +117,7 @@ Observed distribution of |Δ| (pp) with the current data (22:00 feed as the 2026
 | Blue–red localities | 1,089 | −2.0 | +4.6 | +12.2 |
 | Gray localities | 126 | +13.1 | +26.6 | +39.2 |
 
-A shared scale has to choose between the two groups. The default bound of **±12 pp** covers the 5th–95th percentile range of the blue–red localities, so their differences stay visible. Most gray localities are then clipped, which the map flags rather than hides. The legend offers ±6, 8, 12, 20, 30 and 45 pp. Choosing ±45 pp shows every locality unclipped, but compresses the differences among non-gray localities.
+A shared scale has to choose between the two groups. Lightness runs from 0.32 (darkest) to 0.94 (lightest), as wide as the hues stay recognisable at both ends. The default bound is **±10 pp**: the middle half of blue–red localities (+2.2 to +6.8 pp) then spans about 0.14 of lightness, against 0.09 with the earlier ±12 pp and 0.44–0.90 range. 103 of 1,089 blue–red localities (9%) and most gray localities exceed the bound; they are clipped, which the map flags rather than hides. The legend offers ±6, 8, 10, 12, 20, 30 and 45 pp. Choosing ±45 pp shows every locality unclipped, but compresses the differences among non-gray localities.
 
 ## 4. Dashboard statistics
 

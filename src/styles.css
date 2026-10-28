@@ -221,3 +221,16 @@ details summary { cursor: pointer; font-size: 12.5px; margin: 6px 0; }
   .tiles { grid-template-columns: 1fr; }
 }
 .chart-foot { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Mean/median bars by group */
+.mmbars { margin: 4px 0 14px; display: grid; gap: 10px; }
+.mmbars figcaption { display: grid; gap: 2px; }
+.mm-row { display: grid; gap: 4px; }
+.mm-head { display: flex; align-items: baseline; gap: 8px; }
+.mm-dot { width: 10px; height: 10px; border-radius: 50%; align-self: center; flex: none; }
+.mm-name { font-weight: 500; }
+.mm-val { margin-left: auto; font-variant-numeric: tabular-nums; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+.mm-track { position: relative; height: 12px; border-radius: 6px; background: var(--surface-2); }
+.mm-bar { position: absolute; top: 2px; bottom: 2px; border-radius: 4px; }
+.mm-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; }
+.mm-axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; font-family: ui-monospace, Menlo, monospace; border-top: 1px dashed var(--line); padding-top: 4px; }

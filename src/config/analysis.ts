@@ -56,14 +56,17 @@ export const ANALYSIS_CONFIG: AnalysisConfig = {
     hueMode: "categorical",
     categories: TENDENCY,
     // Chosen after inspecting the observed distribution (docs/METHODOLOGY.md,
-    // "Scale bounds"): ±12 pp spans the 5th–95th percentile of non-gray
-    // localities (−2.0 to +12.2 pp), so the very large increases in many
-    // Arab-plurality localities (median +26.6 pp) are clipped — and flagged —
-    // instead of flattening every other difference. Adjustable in the legend.
-    maxAbsChangePp: 12,
+    // "Scale bounds"): most non-gray localities changed by +2 to +7 pp, and ±10 pp
+    // spreads them across a wide band of lightness. About 9% of non-gray localities
+    // and most Arab-plurality localities (median +26.6 pp) exceed it; they are
+    // clipped and flagged rather than flattening every other difference.
+    // Adjustable in the legend.
+    maxAbsChangePp: 10,
     direction: "darker_means_increase",
-    neutralLightness: 0.67,
-    lightnessSpan: 0.23,
+    // Lightness runs from 0.32 (≥ +10 pp) through 0.63 (no change) to 0.94 (≤ −10 pp):
+    // as wide as the hues stay recognisable at both ends.
+    neutralLightness: 0.63,
+    lightnessSpan: 0.31,
     chroma: 0.14,
     hueAnti: 255,
     huePro: 27,
@@ -71,5 +74,5 @@ export const ANALYSIS_CONFIG: AnalysisConfig = {
   },
   tendency: TENDENCY,
   unchangedThresholdPp: 0.5,
-  scaleBoundChoices: [6, 8, 12, 20, 30, 45],
+  scaleBoundChoices: [6, 8, 10, 12, 20, 30, 45],
 };
