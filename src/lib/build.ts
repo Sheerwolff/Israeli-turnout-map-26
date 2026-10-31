@@ -30,6 +30,8 @@ export const DEFAULT_BUILD_OPTIONS: BuildOptions = { primary2026: "count", stale
 
 export interface BuildInputs {
   parties: PartyDef[];
+  /** 2026 party-group mapping, used only for the 2026 balance. */
+  parties2026?: PartyDef[];
   /** Official 2022 results by locality (expc) or by box (expb). */
   results2022: ResultsFile;
   /** Optional box-level 2022 file, used only to cross-check results2022. */
@@ -48,6 +50,7 @@ export interface BuildOutput {
   localities: LocalityRecord[];
   quality: QualityReport;
   parties: PartyDef[];
+  parties2026: PartyDef[];
   totals: {
     y2022: { eligible: number; voters: number; doubleEnvelopeVoters: number };
     y2026: {
@@ -278,6 +281,19 @@ export function buildDataset(input: BuildInputs): BuildOutput {
     }
   }
 
+  // ---- 2026 bloc votes (for the 2026 balance) --------------------------------------------------
+  const votes26 = new Map<number, Record<string, number>>();
+  const registry26 = input.parties2026 ? buildRegistry(input.parties2026) : null;
+  if (registry26) {
+    const unknown26 = res26.partyLetters.filter((l) => !registry26.has(l));
+    if (unknown26.length) issue("unclassified_party_letters_2026", "error", `Party letters in the 2026 results missing from config/parties-2026.json: ${unknown26.join(", ")}.`);
+    for (const r of rows26) {
+      const v = votes26.get(r.code) ?? {};
+      for (const [l, n] of Object.entries(r.votes)) v[l] = (v[l] ?? 0) + n;
+      votes26.set(r.code, v);
+    }
+  }
+
   // ---- Geometry ------------------------------------------------------------------------------
   const geoDup = duplicates(input.geometry, (g) => g.code) as number[];
   if (geoDup.length) issue("duplicate_codes_geometry", "error", "Duplicate locality codes in the boundary layer.", geoDup);
@@ -330,6 +346,12 @@ export function buildDataset(input: BuildInputs): BuildOutput {
     }
     if (!g || !g.hasGeometry) warnings.push("no_geometry");
 
+    const v26 = votes26.get(code);
+    const c26 = registry26 && v26 ? classifyLocality(v26, registry26, { maxUnknownShare: opt.maxUnknownShare }) : null;
+    const balance2026 = c26?.balance ?? null;
+    const balance2022 = classification?.balance ?? null;
+    const balanceChange = balance2026 !== null && balance2022 !== null ? balance2026 - balance2022 : null;
+
     const names = [...new Set([g?.name_he, a?.name, b?.name].filter((x): x is string => !!x))];
     if (a && b && normName(a.name) !== normName(b.name)) warnings.push("name_differs_between_sources");
 
@@ -347,6 +369,9 @@ export function buildDataset(input: BuildInputs): BuildOutput {
       y2022: y22,
       y2026: b,
       classification,
+      blocVotes2026: c26?.blocVotes ?? null,
+      balance2026,
+      balanceChange,
       turnoutChangePp: turnoutChange,
       analysed,
       exclusionReasons,
@@ -411,6 +436,7 @@ export function buildDataset(input: BuildInputs): BuildOutput {
     localities,
     quality: { counts, issues },
     parties,
+    parties2026: (input.parties2026 ?? []).map((p) => ({ ...p, national_votes: rows26.reduce((t, r) => t + (r.votes[p.letter] ?? 0), 0) })),
     totals: {
       y2022: { eligible: sum([...all22.values()].map((a) => a.eligible)), voters: sum([...all22.values()].map((a) => a.voters)), doubleEnvelopeVoters: env22?.voters ?? 0 },
       y2026: {

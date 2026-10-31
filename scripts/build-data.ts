@@ -28,6 +28,7 @@ interface SourceEntry {
 const sources = JSON.parse(readFileSync(join(ROOT, "config/sources.json"), "utf8")) as Record<string, SourceEntry> & { mode: DataMode; modeNote: string; primary2026?: "feed" | "count" };
 const primary2026 = sources.primary2026 ?? "count";
 const partyConfig = JSON.parse(readFileSync(join(ROOT, "config/parties-2022.json"), "utf8")) as { parties: PartyDef[] };
+const partyConfig2026 = JSON.parse(readFileSync(join(ROOT, "config/parties-2026.json"), "utf8")) as { parties: PartyDef[] };
 
 const used: SourceInfo[] = [];
 function load(id: string): string {
@@ -71,6 +72,7 @@ if (MOCK) {
     parties: partyConfig.parties,
     results2022,
     results2022Boxes: boxes2022Text ? readResults(boxes2022Text) : undefined,
+    parties2026: partyConfig2026.parties,
     results2026: readResults(load("results2026")),
     feed2026: sources.feed2026 ? readTurnoutFeed(load("feed2026")) : undefined,
     roster2026: sources.roster2026 ? readRoster(load("roster2026")) : undefined,
@@ -111,6 +113,7 @@ const dataset: Dataset = {
     },
   },
   parties: out.parties,
+  parties2026: out.parties2026,
   localities: out.localities,
   quality: out.quality,
 };

@@ -206,7 +206,7 @@ fig.text(
     "Arab-party and other votes are excluded from the balance.\n"
     "Gray: an Arab party (Ra'am, Hadash–Ta'al or Balad) was the single most-voted list in 2022; horizontal position in that panel carries no meaning.  "
     "Turnout = votes ÷ eligible voters at the locality's ballot boxes\n"
-    "(double envelopes excluded).  Sources: Central Elections Committee 2022 final results; 2026 22:00 election-day turnout report by ballot box (preliminary, not final).  "
+    "(double envelopes excluded).  Sources: Central Elections Committee 2022 final results; CEC 2026 results by locality, all boxes counted (31 Oct 2026, not yet certified).  "
     f"n = {len(rows):,} localities.",
     fontsize=7.9,
     color=MUTED,

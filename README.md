@@ -7,7 +7,7 @@ An interactive analytical map of Israeli localities. Each locality's color encod
 
 The app answers one question: *did turnout change differently across localities with different 2022 political compositions?* It provides a two-dimensional interactive legend, hover tooltips, a detail panel for each locality, search in Hebrew and English, filters, a dashboard (overall change, a scatter plot of balance against change, group box plots), and a data-quality report that lists every unmatched or excluded locality.
 
-> **Data status (28 Oct 2026):** the 2022 data are final official CEC results. 2026 turnout comes from the CEC's **22:00 election-day turnout report** by ballot box (11,996 of 12,018 boxes), with the CEC's partial vote count filling the 20 boxes missing from it. These are not final figures. Boxes last updated before 21:30 under-state turnout and are flagged. The app says so in its header and on every affected locality.
+> **Data status (31 Oct 2026):** the 2022 data are final official CEC results. The 2026 data are the CEC's results by locality with all ballot boxes counted, not yet certified final. They give both 2026 turnout and each locality's 2026 coalition–opposition balance (`config/parties-2026.json`).
 
 ## Run
 
@@ -41,6 +41,18 @@ The processed data are committed in `public/data/`, so the app runs without the 
 | `tests/` | Vitest suites |
 
 Stack: Vite, React and TypeScript; MapLibre GL for the polygon map, with an optional CARTO/OSM basemap; hand-built SVG charts; Vitest.
+
+## Standalone charts
+
+Publication charts in `docs/charts/` (PNG, SVG, PDF), drawn from `public/data/dataset.json` with matplotlib:
+
+| Chart | Script |
+|---|---|
+| Turnout change by 2022 political balance (scatter) | `scripts/charts/turnout_by_balance.py` |
+| Turnout change by group: mean, 95% CI, distribution | `scripts/charts/turnout_box_by_group.py` |
+| Change in coalition–opposition balance by group | `scripts/charts/balance_change_by_group.py` |
+
+Shared palette, fonts and group cut-offs are in `scripts/charts/style.py`. Rerun the scripts after `npm run build:data`.
 
 ## Documentation
 

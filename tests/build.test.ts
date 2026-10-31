@@ -178,3 +178,40 @@ describe("stats and csv helpers", () => {
     expect(parseCsv('﻿a,"b ""c""",d\r\n1,2,3\n')).toEqual([["a", 'b "c"', "d"], ["1", "2", "3"]]);
   });
 });
+
+describe("2026 balance and its change", () => {
+  const parties2026: PartyDef[] = [
+    { letter: "מחל", name_he: "", name_en: "Likud", group: "pro_netanyahu" },
+    { letter: "דרך", name_he: "", name_en: "Yashar", group: "anti_netanyahu" },
+    { letter: "די", name_he: "", name_en: "Unclassified list", group: "other_or_unclassified" },
+  ];
+  // Locality-level 2026 results, as in the CEC expc.csv file.
+  const expc26 = [
+    "סמל ועדה,שם ישוב,סמל ישוב,בזב,מצביעים,פסולים,כשרים,מחל,דרך,די",
+    "1,אלפא,10,1000,700,0,700,300,300,100",
+    "1,בטא,20,1000,700,0,700,100,500,100",
+    "99,מעטפות חיצוניות,9999,0,50,0,50,25,25,0",
+  ].join("\n");
+  const out = buildDataset({ parties, parties2026, results2022: readResults(expc22), results2026: readResults(expc26), geometry });
+  const byCode = new Map(out.localities.map((l) => [l.code, l]));
+
+  it("computes the 2026 balance from the 2026 mapping, excluding unclassified votes", () => {
+    expect(byCode.get(10)!.balance2026).toBe(0);
+    expect(byCode.get(20)!.balance2026).toBeCloseTo(-400 / 600);
+  });
+
+  it("reports the change from the 2022 balance", () => {
+    // 2022 alpha: (400 − 200) / 600 = 1/3 → 2026: 0.
+    expect(byCode.get(10)!.balanceChange).toBeCloseTo(-1 / 3);
+  });
+
+  it("uses locality-level 2026 results for turnout too", () => {
+    expect(byCode.get(10)!.y2026!.turnoutPct).toBe(70);
+    expect(byCode.get(10)!.turnoutChangePp).toBe(10);
+  });
+
+  it("flags 2026 letters missing from the 2026 mapping", () => {
+    const bad = buildDataset({ parties, parties2026: parties2026.slice(0, 2), results2022: readResults(expc22), results2026: readResults(expc26), geometry });
+    expect(bad.quality.issues.find((i) => i.id === "unclassified_party_letters_2026")?.severity).toBe("error");
+  });
+});

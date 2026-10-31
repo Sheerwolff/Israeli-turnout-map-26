@@ -112,6 +112,11 @@ export interface LocalityRecord {
   y2022: Year2022 | null;
   y2026: Year2026 | null;
   classification: Classification | null;
+  /** 2026 bloc votes and balance from the 2026 results, using config/parties-2026.json (null without 2026 party votes). */
+  blocVotes2026: BlocVotes | null;
+  balance2026: number | null;
+  /** balance2026 − classification.balance (2022): positive = shift toward the coalition. */
+  balanceChange: number | null;
   turnoutChangePp: number | null;
   /** Analysed = has a classification (gray or blue–red) and a valid turnout change. */
   analysed: boolean;
@@ -162,6 +167,7 @@ export interface QualityReport {
 export interface Dataset {
   meta: DatasetMeta;
   parties: PartyDef[];
+  parties2026: PartyDef[];
   localities: LocalityRecord[];
   quality: QualityReport;
 }

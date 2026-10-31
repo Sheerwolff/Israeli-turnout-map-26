@@ -56,26 +56,24 @@ Party votes are never used as the numerator, and vote counts are never used in p
 
 ### 2026 sources
 
-`primary2026` in `config/sources.json` decides which source wins for a ballot box present in both. It is currently **`"feed"`**, the project owner's choice. For each 2026 ballot box:
+Since 31 Oct 2026 the 2026 figures come from the **CEC results file by locality** (`data/raw/2026/expc.csv`, supplied by the project owner). All 12,018 ballot boxes are counted and every locality's eligible voters match the CEC roster, so coverage is 100% everywhere. The file has 5,716,673 votes in total, including 451,988 double envelopes, a national turnout of 78.0%. Locality turnout is computed as for 2022, with double envelopes excluded. The results are not yet certified final.
 
-1. If the box is in the **CEC 22:00 election-day turnout report**, its reported *voters* and *eligible* are used (11,996 boxes).
-2. Otherwise, if it is in the **CEC vote count** (`expb.csv`, partial), the counted figures are used and the locality is flagged `uses_count_fallback` (20 boxes, 17 localities).
-3. Otherwise the box is counted as missing (2 boxes).
+Earlier builds used the CEC 22:00 election-day turnout report, filled in from a partial count. Boxes in that report that last updated before 21:30 under-stated turnout by about 3% or more. The report is kept in `data/raw/2026/` for reference. The pipeline can still combine a box-level count with the report: `primary2026` in `config/sources.json` decides which source wins for a box present in both.
 
-**Stale feed boxes.** A feed figure is the box's *last report* of the day, so a box whose last update came before polls closed under-states its turnout. Boxes last updated before 21:30 (2,486 boxes, 21%) are flagged `uses_stale_feed`, and each locality carries `staleFeedShare`, the share of its electorate in such boxes. For boxes that are also in the count, feed voters ÷ counted voters is:
+### 2026 balance
 
-| Last update | Boxes | Ratio |
-|---|---|---|
-| 21:30 or later | 8,856 | 1.00 |
-| 20:00–21:29 | ~1,980 | ~0.97 |
-| 18:00–19:59 | ~250 | ~0.97 |
-| before 18:00 | ~60 | 0.09–0.86 |
+Each locality's 2026 balance uses the same formula as 2022, `(coalition − opposition) ÷ (coalition + opposition)`, with the 2026 lists mapped in `config/parties-2026.json`:
 
-The Filters panel can limit the stale share or exclude affected localities. With `primary2026: "count"`, the rule reverses: the count wins and the feed only fills uncounted boxes (flagged `uses_preliminary_feed`).
+| Group | 2026 lists |
+|---|---|
+| Netanyahu coalition | Likud, Shas, United Torah Judaism, Otzma Yehudit, Religious Zionism, Noam (the outgoing 37th government) |
+| Opposition | Yashar, Beyachad, the Democrats, Yisrael Beiteinu |
+| Arab parties (excluded) | Joint List, Ra'am |
+| Unclassified (excluded) | HaMiluimnikim & HaKalkalit, Amcha Yisrael (the project owner's decision, as for Jewish Home in 2022), and all small lists |
 
-`coverage = Σ eligible of boxes with data ÷ Σ eligible on the roster`. Localities below 98% are flagged `partial_2026_coverage` and drawn with a dashed outline.
+`balanceChange = balance2026 − balance2022`. A negative value means the locality moved toward the opposition, and −0.10 means the gap between the blocs moved 10 points. The 2022 groups and map colors do not use 2026 votes. Across all localities combined, the balance moved from +0.121 to +0.055 (−0.066).
 
-When final results are published, point `results2026` at the final file, set `primary2026` to `"count"` and `mode` to `"official_final"`, and rebuild. Nothing else changes.
+In Arab-plurality localities the coalition and opposition receive few votes, so the balance rests on small numbers and swings widely. Three such localities have no balance in one of the years.
 
 ## 3. Color
 
@@ -112,14 +110,14 @@ The colors are built in **OKLCH**, a perceptual color space, so equal lightness 
 
 ### Scale bounds
 
-Observed distribution of |Δ| (pp) with the current data (22:00 feed as the 2026 source): median 5.1, 90th percentile 19.8, 95th percentile 28.9, maximum 55.3. The distribution is strongly bimodal:
+Observed distribution of |Δ| (pp) with the current data (2026 counted results): median 5.1, 90th percentile 19.3, 95th percentile 30.2, maximum 55.3. The distribution is strongly bimodal:
 
 | Group | n | 5th pct | Median | 95th pct |
 |---|---|---|---|---|
-| Blue–red localities | 1,089 | −2.0 | +4.6 | +12.2 |
-| Gray localities | 126 | +13.1 | +26.6 | +39.2 |
+| Blue–red localities | 1,089 | −1.3 | +4.6 | +10.8 |
+| Gray localities | 126 | +14.6 | +28.2 | +40.4 |
 
-A shared scale has to choose between the two groups. Lightness runs from 0.32 (darkest) to 0.94 (lightest), as wide as the hues stay recognisable at both ends. The default bound is **±10 pp**: the middle half of blue–red localities (+2.2 to +6.8 pp) then spans about 0.14 of lightness, against 0.09 with the earlier ±12 pp and 0.44–0.90 range. 103 of 1,089 blue–red localities (9%) and most gray localities exceed the bound; they are clipped, which the map flags rather than hides. The legend offers ±6, 8, 10, 12, 20, 30 and 45 pp. Choosing ±45 pp shows every locality unclipped, but compresses the differences among non-gray localities.
+A shared scale has to choose between the two groups. Lightness runs from 0.32 (darkest) to 0.94 (lightest), as wide as the hues stay recognisable at both ends. The default bound is **±10 pp**: the middle half of blue–red localities (+2.3 to +6.5 pp) then spans about 0.13 of lightness. 79 of 1,089 blue–red localities (7%) and most gray localities exceed the bound; they are clipped, which the map flags rather than hides. The legend offers ±6, 8, 10, 12, 20, 30 and 45 pp. Choosing ±45 pp shows every locality unclipped, but compresses the differences among non-gray localities.
 
 ## 4. Dashboard statistics
 

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import matplotlib
+import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -43,7 +44,7 @@ FOOTNOTE = (
     "Balance = (coalition − opposition) ÷ (coalition + opposition) votes, 2022.\n"
     "Arab-party plurality: Ra'am, Hadash–Ta'al or Balad was the single most-voted list in 2022.  "
     "Turnout = votes ÷ eligible voters at the locality's ballot boxes (double envelopes excluded).\n"
-    "Sources: Central Elections Committee 2022 final results; 2026 22:00 election-day turnout report by ballot box (preliminary, not final)."
+    "Sources: Central Elections Committee 2022 final results; CEC 2026 results by locality, all ballot boxes counted (31 Oct 2026, not yet certified)."
 )
 
 
@@ -79,6 +80,10 @@ def load_rows():
             "balance": l["classification"]["balance"],
             "change": l["turnoutChangePp"],
             "eligible": l["y2022"]["eligible"],
+            "balance2026": l.get("balance2026"),
+            "balance_change": l.get("balanceChange"),
+            "bloc22": l["classification"]["blocVotes"],
+            "bloc26": l.get("blocVotes2026"),
         }
         for l in data["localities"]
         if l["analysed"]
@@ -96,3 +101,19 @@ def save(fig, stem):
     OUT.mkdir(parents=True, exist_ok=True)
     for ext in ("png", "svg", "pdf"):
         fig.savefig(OUT / f"{stem}.{ext}", facecolor=BG)
+
+
+Z975 = 1.959963984540054
+
+
+def t975(df):
+    """Two-sided 95% Student-t critical value (Cornish–Fisher expansion; error < 1e-4 for df ≥ 30)."""
+    z = Z975
+    return z + (z**3 + z) / (4 * df) + (5 * z**5 + 16 * z**3 + 3 * z) / (96 * df**2) + (3 * z**7 + 19 * z**5 + 17 * z**3 - 15 * z) / (384 * df**3)
+
+
+def summary(x):
+    q1, med, q3 = np.quantile(x, [0.25, 0.5, 0.75])  # linear interpolation, as in src/lib/stats.ts
+    mean = x.mean()
+    half = t975(len(x) - 1) * x.std(ddof=1) / np.sqrt(len(x))
+    return q1, med, q3, mean, mean - half, mean + half

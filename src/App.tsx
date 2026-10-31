@@ -118,7 +118,7 @@ export function App() {
           <p className="sub">Locality-level explorer. Hue = 2022 vote balance; lightness = change in turnout (percentage points).</p>
         </div>
         <div className={`mode mode-${meta.mode}`} role="status">
-          {meta.mode === "mock" ? "MOCK DATA — not real election results" : meta.mode === "official_partial" ? (meta.primary2026 === "feed" ? "2026: election-day turnout report (not final)" : "2026: partial count (not final)") : "Official final results"}
+          {meta.mode === "mock" ? "MOCK DATA — not real election results" : meta.mode === "official_partial" ? (meta.primary2026 === "feed" ? "2026: election-day turnout report (not final)" : "2026: full CEC count, not yet certified") : "Official final results"}
         </div>
       </header>
 

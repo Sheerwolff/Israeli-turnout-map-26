@@ -1,0 +1,54 @@
+{
+  "election": "Knesset 26 (27 October 2026)",
+  "description": "Party-group mapping for the 2026 results, used only to compute each locality's 2026 political balance (and its change from 2022). Keys are the CEC ballot letters in the 2026 results file. Every letter in that file must be listed; the pipeline fails otherwise. The 2022 classification (hue, gray rule, groups) is unaffected by this file.",
+  "groups": {
+    "pro_netanyahu": "Netanyahu coalition: the lists of the outgoing 37th government (Likud, Shas, United Torah Judaism, Otzma Yehudit, Religious Zionism, Noam).",
+    "anti_netanyahu": "Opposition: Zionist opposition lists that ran against a Netanyahu-led government (Yashar, Beyachad, the Democrats, Yisrael Beiteinu).",
+    "arab_parties": "Arab-led lists (Joint List of Hadash–Ta'al–Balad, Ra'am). Excluded from the balance, as in 2022.",
+    "other_or_unclassified": "Every other list, including HaMiluimnikim & HaKalkalit and Amcha Yisrael, whose bloc alignment was not fixed (left unclassified at the project owner's decision, as Jewish Home was in 2022), and all small lists. Excluded from the balance."
+  },
+  "parties": [
+    { "letter": "מחל", "name_he": "הליכוד", "name_en": "Likud", "group": "pro_netanyahu" },
+    { "letter": "שס", "name_he": "ש\"ס", "name_en": "Shas", "group": "pro_netanyahu" },
+    { "letter": "ג", "name_he": "יהדות התורה", "name_en": "United Torah Judaism", "group": "pro_netanyahu" },
+    { "letter": "ב", "name_he": "עוצמה יהודית", "name_en": "Otzma Yehudit", "group": "pro_netanyahu" },
+    { "letter": "ט", "name_he": "הציונות הדתית", "name_en": "Religious Zionism (with Zehut)", "group": "pro_netanyahu" },
+    { "letter": "ני", "name_he": "נעם", "name_en": "Noam", "group": "pro_netanyahu", "note": "Ran inside the Religious Zionism list in 2022, so it was in the coalition bloc then too." },
+
+    { "letter": "דרך", "name_he": "ישר!", "name_en": "Yashar (Eisenkot)", "group": "anti_netanyahu" },
+    { "letter": "רק", "name_he": "ביחד", "name_en": "Beyachad (Bennett, with Yesh Atid)", "group": "anti_netanyahu" },
+    { "letter": "אמת", "name_he": "הדמוקרטים", "name_en": "The Democrats (Labor + Meretz)", "group": "anti_netanyahu" },
+    { "letter": "ל", "name_he": "ישראל ביתנו", "name_en": "Yisrael Beiteinu", "group": "anti_netanyahu" },
+
+    { "letter": "ודם", "name_he": "הרשימה המשותפת", "name_en": "Joint List (Hadash–Ta'al–Balad)", "group": "arab_parties" },
+    { "letter": "עם", "name_he": "רע\"ם", "name_en": "Ra'am (United Arab List)", "group": "arab_parties" },
+
+    { "letter": "די", "name_he": "המילואימניקים והכלכלית", "name_en": "HaMiluimnikim & HaKalkalit (Hendel, Zelekha)", "group": "other_or_unclassified", "note": "Bloc alignment not fixed; left unclassified at the project owner's decision." },
+    { "letter": "ך", "name_he": "עמך ישראל", "name_en": "Amcha Yisrael (Winter)", "group": "other_or_unclassified", "note": "Bloc alignment not fixed; left unclassified at the project owner's decision." },
+    { "letter": "זך", "name_he": "הציבור החרדי", "name_en": "HaTzibur HaHaredi", "group": "other_or_unclassified" },
+    { "letter": "פה", "name_he": "אני ואתה", "name_en": "Ani VeAta", "group": "other_or_unclassified" },
+    { "letter": "ד", "name_he": "השותפות לכולם", "name_en": "Partnership for All", "group": "other_or_unclassified" },
+    { "letter": "י", "name_he": "ישראל תחילה", "name_en": "Israel First", "group": "other_or_unclassified" },
+    { "letter": "ק", "name_he": "תקומה", "name_en": "Tkuma", "group": "other_or_unclassified" },
+    { "letter": "בד", "name_he": "", "name_en": "(list בד)", "group": "other_or_unclassified" },
+    { "letter": "בי", "name_he": "", "name_en": "(list בי)", "group": "other_or_unclassified" },
+    { "letter": "בקר", "name_he": "", "name_en": "(list בקר)", "group": "other_or_unclassified" },
+    { "letter": "ה", "name_he": "", "name_en": "(list ה)", "group": "other_or_unclassified" },
+    { "letter": "ז", "name_he": "", "name_en": "(list ז)", "group": "other_or_unclassified" },
+    { "letter": "זץ", "name_he": "", "name_en": "(list זץ)", "group": "other_or_unclassified" },
+    { "letter": "יק", "name_he": "", "name_en": "(list יק)", "group": "other_or_unclassified" },
+    { "letter": "כן", "name_he": "", "name_en": "(list כן)", "group": "other_or_unclassified" },
+    { "letter": "נף", "name_he": "", "name_en": "(list נף)", "group": "other_or_unclassified" },
+    { "letter": "נץ", "name_he": "", "name_en": "(list נץ)", "group": "other_or_unclassified" },
+    { "letter": "נקי", "name_he": "", "name_en": "(list נקי)", "group": "other_or_unclassified" },
+    { "letter": "נר", "name_he": "", "name_en": "(list נר)", "group": "other_or_unclassified" },
+    { "letter": "צבי", "name_he": "", "name_en": "(list צבי)", "group": "other_or_unclassified" },
+    { "letter": "צדק", "name_he": "", "name_en": "(list צדק)", "group": "other_or_unclassified" },
+    { "letter": "צף", "name_he": "", "name_en": "(list צף)", "group": "other_or_unclassified" },
+    { "letter": "קה", "name_he": "", "name_en": "(list קה)", "group": "other_or_unclassified" },
+    { "letter": "קך", "name_he": "", "name_en": "(list קך)", "group": "other_or_unclassified" },
+    { "letter": "קץ", "name_he": "", "name_en": "(list קץ)", "group": "other_or_unclassified" },
+    { "letter": "רץ", "name_he": "", "name_en": "(list רץ)", "group": "other_or_unclassified" }
+  ],
+  "name_sources": "List names and leaders for the main lists come from a public third-party mirror (harelc/elections-vote-transfer, party_config.py) and should be checked against the CEC candidate-lists publication. Lists shown only by letter each received under 0.2% of the vote; their names were not available in the sources at hand. None of them affects the balance, since all are other_or_unclassified."
+}
