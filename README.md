@@ -50,7 +50,7 @@ Publication charts in `docs/charts/` (PNG, SVG, PDF), drawn from `public/data/da
 |---|---|
 | Turnout change by 2022 political balance (scatter) | `scripts/charts/turnout_by_balance.py` |
 | Turnout change by group: mean, 95% CI, distribution | `scripts/charts/turnout_box_by_group.py` |
-| Change in coalition–opposition balance by group | `scripts/charts/balance_change_by_group.py` |
+| Change in coalition–opposition balance by group, unweighted and weighted by 2022 eligible voters | `scripts/charts/balance_change_by_group.py` |
 
 Shared palette, fonts and group cut-offs are in `scripts/charts/style.py`. Rerun the scripts after `npm run build:data`.
 

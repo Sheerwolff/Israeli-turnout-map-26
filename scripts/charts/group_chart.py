@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import FancyBboxPatch
 
-from style import BG, COLOR, DARK, GRID, HALO, INK, INK2, MUTED, NAME, RANGE, SERIF, apply_rc, save, signed, summary
+from style import BG, COLOR, DARK, GRID, HALO, INK, INK2, MUTED, NAME, RANGE, SERIF, apply_rc, save, signed, summary, summary_weighted
 
 ORDER = ["anti", "bal", "pro", "gray"]
 
@@ -25,9 +25,13 @@ def draw_group_chart(
     below_note=lambda g: "",
     row_note=lambda g: "",
     reference=None,
+    weights=None,
+    key_text="Diamond: mean  ·  whiskers: 95% confidence interval of the mean  ·  box: middle half of localities, thin line: median",
+    mean_word="mean",
 ):
     """vals: {group: np.array}. x_range: (lo, hi) shown; values outside are counted at the row edges.
-    tick_label / value_label: number → text. reference: optional (x, label) drawn as a dashed line."""
+    tick_label / value_label: number → text. reference: optional (x, label) drawn as a dashed line.
+    weights: optional {group: np.array} aligned with vals; statistics become weighted and dots are sized by weight."""
     apply_rc()
     X0, X1 = x_range
     span = X1 - X0
@@ -53,10 +57,18 @@ def draw_group_chart(
     rng = np.random.default_rng(11)
     for i, g in enumerate(ORDER):
         x = vals[g]
-        q1, med, q3, mean, lo, hi = summary(x)
+        if weights is None:
+            q1, med, q3, mean, lo, hi = summary(x)
+            sizes = np.full(len(x), 11.0)
+        else:
+            w = weights[g]
+            q1, med, q3, mean, lo, hi, _ = summary_weighted(x, w)
+            sizes = np.clip(np.sqrt(w) * 0.38, 3, 170)
         jit = i + rng.uniform(-0.27, 0.27, len(x))
         shown = (x >= X0) & (x <= X1)
-        ax.scatter(x[shown], jit[shown], s=11, color=COLOR[g], alpha=0.38, linewidths=0, zorder=2)
+        order = np.argsort(-sizes[shown])  # big dots underneath
+        ax.scatter(x[shown][order], jit[shown][order], s=sizes[shown][order], color=COLOR[g], alpha=0.38 if weights is None else 0.42,
+                   edgecolors=BG if weights is not None else "none", linewidths=0.4 if weights is not None else 0, zorder=2)
         below, above = int((x < X0).sum()), int((x > X1).sum())
         if below:
             ax.text(X0 - pad * 0.8, i + 0.36, f"← {below} below {tick_label(X0)}{below_note(g)}", fontsize=7.8, color=MUTED, ha="left", va="center")
@@ -78,7 +90,7 @@ def draw_group_chart(
         note = row_note(g)
         if note:
             fig.text(0.075, yfig - 0.036, note, fontsize=8, color=MUTED, va="top", style="italic", linespacing=1.3)
-        fig.text(0.845, yfig + 0.016, f"mean {value_label(mean)}", fontsize=10.5, color=INK, va="center")
+        fig.text(0.845, yfig + 0.016, f"{mean_word} {value_label(mean)}", fontsize=10.5, color=INK, va="center")
         fig.text(0.845, yfig - 0.014, f"95% CI {value_label(lo, unit=False)} to {value_label(hi, unit=False)}", fontsize=8.6, color=MUTED, va="center")
 
     for i in range(1, len(ORDER)):
@@ -102,11 +114,12 @@ def draw_group_chart(
     for w in (4.0, 6.6):
         key.plot([w, w], [-0.5, 0.5], color=INK, lw=2.0, solid_capstyle="butt")
     key.scatter([5.3], [0], marker="D", s=30, color="#bdb9b1", edgecolors=INK, linewidths=1.2, zorder=3)
-    fig.text(0.36, ky, "Diamond: mean  ·  whiskers: 95% confidence interval of the mean  ·  box: middle half of localities, thin line: median",
-             fontsize=8.4, color=MUTED, va="center")
+    fig.text(0.36, ky, key_text, fontsize=8.4, color=MUTED, va="center")
 
     fig.text(0.075, 0.935, title, fontsize=27, fontfamily=SERIF, fontweight="bold", color=INK, va="bottom")
     fig.text(0.075, 0.922, subtitle, fontsize=10.6, color=INK2, va="top", linespacing=1.45)
     fig.text(0.075, 0.016, footnote, fontsize=7.9, color=MUTED, va="bottom", linespacing=1.55)
     save(fig, stem)
-    return {g: [round(float(v), 4) for v in summary(vals[g])] for g in ORDER}
+    if weights is None:
+        return {g: [round(float(v), 4) for v in summary(vals[g])] for g in ORDER}
+    return {g: [round(float(v), 4) for v in summary_weighted(vals[g], weights[g])] for g in ORDER}

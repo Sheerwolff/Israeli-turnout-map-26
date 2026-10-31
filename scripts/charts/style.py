@@ -1,6 +1,7 @@
 """Shared look and data loading for the standalone charts in docs/charts/."""
 
 import json
+import math
 from pathlib import Path
 
 import matplotlib
@@ -103,13 +104,60 @@ def save(fig, stem):
         fig.savefig(OUT / f"{stem}.{ext}", facecolor=BG)
 
 
-Z975 = 1.959963984540054
+def _betacf(a, b, x, iters=300, eps=1e-15):
+    """Continued fraction for the regularized incomplete beta function (modified Lentz)."""
+    tiny = 1e-300
+    qab, qap, qam = a + b, a + 1, a - 1
+    c, d = 1.0, 1 - qab * x / qap
+    d = 1 / (d if abs(d) > tiny else tiny)
+    h = d
+    for m in range(1, iters + 1):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1 + aa * d
+        d = 1 / (d if abs(d) > tiny else tiny)
+        c = 1 + aa / c if abs(1 + aa / c) > tiny else tiny
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1 + aa * d
+        d = 1 / (d if abs(d) > tiny else tiny)
+        c = 1 + aa / c if abs(1 + aa / c) > tiny else tiny
+        delta = d * c
+        h *= delta
+        if abs(delta - 1) < eps:
+            break
+    return h
+
+
+def _betainc(a, b, x):
+    """Regularized incomplete beta I_x(a, b)."""
+    if x <= 0:
+        return 0.0
+    if x >= 1:
+        return 1.0
+    lbeta = math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b) + a * math.log(x) + b * math.log(1 - x)
+    if x < (a + 1) / (a + b + 2):
+        return math.exp(lbeta) * _betacf(a, b, x) / a
+    return 1 - math.exp(lbeta) * _betacf(b, a, 1 - x) / b
+
+
+def t_cdf(t, df):
+    """Student-t CDF for real df > 0."""
+    x = df / (df + t * t)
+    tail = 0.5 * _betainc(df / 2, 0.5, x)
+    return 1 - tail if t > 0 else tail
 
 
 def t975(df):
-    """Two-sided 95% Student-t critical value (Cornish–Fisher expansion; error < 1e-4 for df ≥ 30)."""
-    z = Z975
-    return z + (z**3 + z) / (4 * df) + (5 * z**5 + 16 * z**3 + 3 * z) / (96 * df**2) + (3 * z**7 + 19 * z**5 + 17 * z**3 - 15 * z) / (384 * df**3)
+    """Two-sided 95% Student-t critical value (exact, by bisection on the CDF); df may be fractional."""
+    lo, hi = 0.0, 1000.0
+    for _ in range(200):
+        mid = (lo + hi) / 2
+        if t_cdf(mid, df) < 0.975:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2
 
 
 def summary(x):
@@ -117,3 +165,26 @@ def summary(x):
     mean = x.mean()
     half = t975(len(x) - 1) * x.std(ddof=1) / np.sqrt(len(x))
     return q1, med, q3, mean, mean - half, mean + half
+
+
+def weighted_quantiles(x, w, qs):
+    """Quantiles of x with weights w: the value below which a share q of the total weight lies (midpoint rule)."""
+    order = np.argsort(x)
+    x, w = x[order], w[order]
+    cum = (np.cumsum(w) - 0.5 * w) / w.sum()
+    return np.interp(qs, cum, x)
+
+
+def summary_weighted(x, w):
+    """Weighted q1, median, q3, mean and 95% CI of the mean.
+
+    SE uses the ratio-estimator (sandwich) form √(Σw²(x−μ)²) ÷ Σw with a small-sample n/(n−1) factor;
+    the t value uses the effective number of observations n_eff = (Σw)² ÷ Σw²."""
+    w = w / w.sum()
+    q1, med, q3 = weighted_quantiles(x, w, [0.25, 0.5, 0.75])
+    mean = float(np.sum(w * x))
+    n = len(x)
+    se = np.sqrt(np.sum(w**2 * (x - mean) ** 2) * n / (n - 1))
+    n_eff = 1 / np.sum(w**2)
+    half = t975(max(n_eff - 1, 1)) * se
+    return q1, med, q3, mean, mean - half, mean + half, n_eff
